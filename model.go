@@ -1,0 +1,123 @@
+package main
+
+import (
+	"github.com/globalsign/mgo/bson"
+	"mime/multipart"
+)
+
+type registModel struct {
+	Name   string `bson:"nickName" json:"nickName" binding:"required"`
+	Email  string `bson:"email" json:"email" binding:"required"`
+	Passwd string `bson:"passwd" json:"passwd" binding:"required"`
+	Token  string `json:"token" binding:"required"`
+}
+type basicUserModel struct {
+	Name   string `bson:"nickName" json:"nickName"`
+	Avatar string `bson:"avatar" json:"avatar,omitempty"`
+}
+
+type reCapResponseModel struct {
+	Success bool     `json:"success"`
+	Err     []string `json:"error-codes,omitempty"`
+	Time    string   `json:"challenge_ts,omitempty"`
+	Host    string   `json:"hostname,omitempty"`
+	Score   float32  `json:"score,omitempty"`
+	Action  string   `json:"action,omitempty"`
+}
+
+type activeUserModel struct {
+	Email      string `json:"email" bson:"email" form:"email" binding:"required"`
+	ActiveCode string `json:"activeCode" bson:"activeCode" form:"activeCode" binding:"required"`
+	Expire     int64  `json:"expireDate" bson:"expireDate" form:"expireDate" binding:"required"`
+}
+type changeUserModel struct {
+	basicUserModel `bson:",inline"`
+	ProPic         string `json:"profilePic,omitempty" bson:"profilePic"`
+}
+type loginModel struct {
+	Email  string `json:"email" bson:"email" binding:"required"`
+	Passwd string `json:"passwd" bson:"passwd" binding:"required"`
+	Token  string `json:"token" binding:"required"`
+}
+
+type loginDBModel struct {
+	Email      string        `json:"-" bson:"email"`
+	Passwd     string        `json:"-" bson:"passwd"`
+	ActiveCode string        `json:"-" bson:"activeCode"`
+	ID         bson.ObjectId `json:"uid" bson:"_id"`
+	Name       string        `json:"nickName" bson:"nickName"`
+	Avatar     string        `json:"avatar,omitempty" bson:"avatar"`
+	ProPic     string        `json:"profilePic,omitempty" bson:"profilePic"`
+}
+type vcScalfold struct {
+	Title string   `bson:"title" json:"title" binding:"required"`
+	Price *int     `bson:"price" json:"price" binding:"exists"`
+	Desc  string   `bson:"desc" json:"desc"`
+	Tags  []string `bson:"tags" json:"tags" binding:"required"`
+	Cover string   `bson:"cover" json:"cover"`
+	Date  string   `bson:"date" json:"date"`
+	View  int64    `bson:"view" json:"view"`
+}
+type myVCModel struct {
+	vcScalfold `bson:",inline"`
+	ID         bson.ObjectId `bson:"_id" json:"id" binding:"required"`
+}
+type basicVCModel struct {
+	vcScalfold `bson:",inline"`
+	ID         bson.ObjectId  `bson:"_id" json:"id"`
+	Owner      bson.ObjectId  `bson:"owner" json:"-"`
+	OwnerDoc   basicUserModel `bson:"owner_doc" json:"owner"`
+}
+type basicVideoModel struct {
+	Title string `bson:"title" json:"title"`
+	Desc  string `bson:"desc" json:"desc"`
+	Date  string `bson:"date" json:"date"`
+	ID    string `bson:"_id" json:"id"`
+	Cover string `bson:"cover" json:"cover"`
+	Path  string `bson:"path" json:"path"`
+}
+type uploadFileModel struct {
+	Blob *multipart.FileHeader `json:"blob" binding:"required"`
+	ID   string                `json:"vid" form:"vid" binding:"required"`
+}
+
+type addVideoModel struct {
+	Vid   string        `json:"vid" binding:"required"`
+	Cid   bson.ObjectId `json:"cid" binding:"required"`
+	Title string        `json:"title" binding:"required"`
+	Desc  string        `json:"desc"`
+}
+
+type changeCoverModel struct {
+	Cid  bson.ObjectId `json:"cid" binding:"required"`
+	Path string        `json:"path" form:"path"`
+}
+
+type outVideoModel struct {
+	basicVCModel `bson:",inline"`
+	Videos       []basicVideoModel `bson:"videos" json:"videos"`
+}
+type getVModel struct {
+	Size  int  `form:"size" binding:"required"`
+	Start *int `form:"fi" binding:"exists"`
+}
+type userPicModel struct {
+	Type string                `form:"type" binding:"required"`
+	Blob *multipart.FileHeader `json:"blob" binding:"required"`
+}
+type delVideoQ struct {
+	Cid   string `form:"cid" binding:"required"`
+	Vid   string `form:"vid" binding:"required"`
+	Cover string `form:"cov" binding:"required"`
+}
+type circleModel struct {
+	Content string   `json:"cont" bson:"cont" binding:"required"`
+	Pics    []string `bson:"pics,omitempty" json:"pics"`
+}
+type outCircleModel struct {
+	circleModel `bson:",inline"`
+	ID          bson.ObjectId  `bson:"_id" json:"id"`
+	Owner       bson.ObjectId  `bson:"owner" json:"-"`
+	OwnerDoc    basicUserModel `bson:"owner_doc" json:"owner"`
+	Date        string         `bson:"date" json:"date"`
+}
