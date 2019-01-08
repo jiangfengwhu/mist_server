@@ -121,3 +121,7 @@ type outCircleModel struct {
 	OwnerDoc    basicUserModel `bson:"owner_doc" json:"owner"`
 	Date        string         `bson:"date" json:"date"`
 }
+type myCircleModel struct {
+	circleModel `bson:",inline"`
+	Date        string `bson:"date" json:"date"`
+}

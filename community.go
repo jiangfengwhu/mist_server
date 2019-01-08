@@ -60,3 +60,13 @@ func latestCircle(c *gin.Context) {
 	c.JSON(200, re)
 	return
 }
+func myCommAll(c *gin.Context) {
+	var re []myCircleModel
+	err := findC("community", bson.M{"owner": bson.ObjectIdHex(c.MustGet("auth").(string))}, true, &re)
+	if err != nil {
+		c.JSON(200, false)
+		return
+	}
+	c.JSON(200, re)
+	return
+}

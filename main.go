@@ -36,5 +36,6 @@ func main() {
 	api.POST("uploadImage", Auth(), uploadImage)
 	api.POST("addCircle", Auth(), addCircle)
 	api.GET("getCircles", latestCircle)
+	api.GET("mycommall", Auth(), myCommAll)
 	r.Run(":3000")
 }
