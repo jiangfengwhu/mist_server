@@ -37,5 +37,6 @@ func main() {
 	api.POST("addCircle", Auth(), addCircle)
 	api.GET("getCircles", latestCircle)
 	api.GET("mycommall", Auth(), myCommAll)
+	api.DELETE("delcomms/:id", Auth(), delcomms)
 	r.Run(":3000")
 }

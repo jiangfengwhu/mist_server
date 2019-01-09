@@ -5,6 +5,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/globalsign/mgo/bson"
 	"log"
+	"os"
+	"path/filepath"
 	"time"
 )
 
@@ -68,5 +70,26 @@ func myCommAll(c *gin.Context) {
 		return
 	}
 	c.JSON(200, re)
+	return
+}
+func delcomms(c *gin.Context) {
+	id := c.Param("id")
+	if len(id) != 24 {
+		log.Println(id)
+		c.JSON(200, gin.H{"status": false, "msg": "not correct id"})
+		return
+	}
+	var re circleModel
+	err := findAndModify("community", bson.M{"_id": bson.ObjectIdHex(id), "owner": bson.ObjectIdHex(c.MustGet("auth").(string))}, nil, false, true, false, &re)
+	if err != nil {
+		c.JSON(200, gin.H{"status": false, "msg": err.Error()})
+		return
+	}
+	log.Println(re)
+	for _, val := range re.Pics {
+		os.Remove(globalConf.ResDir + "/community/" + filepath.Base(val))
+		os.Remove(globalConf.ResDir + "/community/" + filepath.Base(val) + "_thb.jpeg")
+	}
+	c.JSON(200, gin.H{"status": true, "msg": "删除状态成功"})
 	return
 }

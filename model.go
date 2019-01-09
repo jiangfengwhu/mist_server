@@ -123,5 +123,6 @@ type outCircleModel struct {
 }
 type myCircleModel struct {
 	circleModel `bson:",inline"`
-	Date        string `bson:"date" json:"date"`
+	Date        string        `bson:"date" json:"date"`
+	ID          bson.ObjectId `bson:"_id" json:"id"`
 }
