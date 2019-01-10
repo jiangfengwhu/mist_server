@@ -19,6 +19,7 @@ func main() {
 	api.GET("logstatus", logstatus)
 	api.GET("logout", logout)
 	api.GET("activeAccount", activeAccount)
+	api.PUT("updateinfo", Auth(), updateInfo)
 	api.POST("createCollection", Auth(), createCollection)
 	api.OPTIONS("uploadfile/:id", Auth(), checkBP)
 	api.POST("uploadfile", Auth(), uploadFile)

@@ -7,16 +7,14 @@ import (
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
 	"golang.org/x/crypto/bcrypt"
-	"math/rand"
-	"os"
-	"strings"
-	"time"
-
-	// "io/ioutil"
 	"log"
+	"math/rand"
 	"net/http"
 	"net/url"
+	"os"
+	"path/filepath"
 	"strconv"
+	"time"
 )
 
 // Auth is auth middleware
@@ -207,14 +205,18 @@ func changepic(c *gin.Context) {
 		return
 	}
 	key := ""
-	if up.Type == "1" {
+	switch up.Type {
+	case "1":
 		key = "avatar"
-	} else if up.Type == "2" {
+	case "2":
 		key = "profilePic"
-	} else {
+	case "3":
+		key = "golden"
+	default:
 		c.JSON(200, gin.H{"status": false, "msg": "类型错误"})
 		return
 	}
+
 	handleUser(func(col *mgo.Collection) {
 		var tmpuser map[string]interface{}
 		err := col.Find(bson.M{"_id": bson.ObjectIdHex(c.MustGet("auth").(string))}).One(&tmpuser)
@@ -223,8 +225,8 @@ func changepic(c *gin.Context) {
 			return
 		}
 		if tmpuser[key] != nil {
-			oldpath := strings.Split(tmpuser[key].(string), "/")
-			err := os.Remove(globalConf.ResDir + "/pics/" + oldpath[len(oldpath)-1])
+			oldpath := filepath.Base(tmpuser[key].(string))
+			err := os.Remove(globalConf.ResDir + "/pics/" + oldpath)
 			if err != nil {
 				c.JSON(200, gin.H{"status": false, "msg": "文件系统错误"})
 				return
@@ -247,4 +249,19 @@ func changepic(c *gin.Context) {
 		}
 		c.JSON(200, gin.H{"status": true, "msg": "更换照片成功", "path": path})
 	})
+}
+func updateInfo(c *gin.Context) {
+	var cinfo changeInfoModel
+	if err := c.ShouldBind(&cinfo); err != nil {
+		log.Println(err)
+		c.JSON(200, gin.H{"status": false, "msg": "信息不完整"})
+		return
+	}
+	err := updateC("user", bson.M{"_id": bson.ObjectIdHex(c.MustGet("auth").(string))}, bson.M{"$set": cinfo})
+	if err != nil {
+		c.JSON(200, gin.H{"status": false, "msg": "数据库错误"})
+		return
+	}
+	c.JSON(200, gin.H{"status": true, "msg": "更新个人信息成功"})
+	return
 }

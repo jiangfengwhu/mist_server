@@ -15,6 +15,10 @@ type basicUserModel struct {
 	Name   string `bson:"nickName" json:"nickName"`
 	Avatar string `bson:"avatar" json:"avatar,omitempty"`
 }
+type changeInfoModel struct {
+	Name string `bson:"nickName" json:"nickName" binding:"required"`
+	Sign string `bson:"sign,omitempty" json:"sign,omitempty"`
+}
 
 type reCapResponseModel struct {
 	Success bool     `json:"success"`
@@ -48,6 +52,8 @@ type loginDBModel struct {
 	Name       string        `json:"nickName" bson:"nickName"`
 	Avatar     string        `json:"avatar,omitempty" bson:"avatar"`
 	ProPic     string        `json:"profilePic,omitempty" bson:"profilePic"`
+	Sign       string        `json:"sign,omitempty" bson:"sign,omitempty"`
+	Gloden     string        `json:"golden,omitempty" bson:"golden,omitempty"`
 }
 type vcScalfold struct {
 	Title string   `bson:"title" json:"title" binding:"required"`
@@ -102,8 +108,8 @@ type getVModel struct {
 	Start *int `form:"fi" binding:"exists"`
 }
 type userPicModel struct {
-	Type string                `form:"type" binding:"required"`
-	Blob *multipart.FileHeader `json:"blob" binding:"required"`
+	// Blob *multipart.FileHeader `form:"pic" binding:"required"`
+	Type string `form:"type" binding:"required"`
 }
 type delVideoQ struct {
 	Cid   string `form:"cid" binding:"required"`
