@@ -55,7 +55,7 @@ type vcScalfold struct {
 	Desc  string   `bson:"desc" json:"desc"`
 	Tags  []string `bson:"tags" json:"tags" binding:"required"`
 	Cover string   `bson:"cover" json:"cover"`
-	Date  string   `bson:"date" json:"date"`
+	Date  int64    `bson:"date" json:"date"`
 	View  int64    `bson:"view" json:"view"`
 }
 type myVCModel struct {
@@ -66,12 +66,12 @@ type basicVCModel struct {
 	vcScalfold `bson:",inline"`
 	ID         bson.ObjectId  `bson:"_id" json:"id"`
 	Owner      bson.ObjectId  `bson:"owner" json:"-"`
-	OwnerDoc   basicUserModel `bson:"owner_doc" json:"owner"`
+	OwnerDoc   basicUserModel `bson:"owner_doc,omitempty" json:"owner"`
 }
 type basicVideoModel struct {
 	Title string `bson:"title" json:"title"`
 	Desc  string `bson:"desc" json:"desc"`
-	Date  string `bson:"date" json:"date"`
+	Date  int64  `bson:"date" json:"date"`
 	ID    string `bson:"_id" json:"id"`
 	Cover string `bson:"cover" json:"cover"`
 	Path  string `bson:"path" json:"path"`
@@ -111,18 +111,13 @@ type delVideoQ struct {
 	Cover string `form:"cov" binding:"required"`
 }
 type circleModel struct {
-	Content string   `json:"cont" bson:"cont" binding:"required"`
-	Pics    []string `bson:"pics,omitempty" json:"pics"`
+	ID      bson.ObjectId `bson:"_id" json:"id"`
+	Content string        `json:"cont,omitempty" bson:"cont,omitempty"`
+	Pics    []string      `bson:"pics,omitempty" json:"pics,omitempty"`
+	Date    int64         `bson:"date" json:"date"`
 }
 type outCircleModel struct {
 	circleModel `bson:",inline"`
-	ID          bson.ObjectId  `bson:"_id" json:"id"`
 	Owner       bson.ObjectId  `bson:"owner" json:"-"`
-	OwnerDoc    basicUserModel `bson:"owner_doc" json:"owner"`
-	Date        string         `bson:"date" json:"date"`
-}
-type myCircleModel struct {
-	circleModel `bson:",inline"`
-	Date        string        `bson:"date" json:"date"`
-	ID          bson.ObjectId `bson:"_id" json:"id"`
+	OwnerDoc    basicUserModel `bson:"owner_doc,omitempty" json:"owner"`
 }

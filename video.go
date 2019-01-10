@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
@@ -78,15 +77,18 @@ func createCollection(c *gin.Context) {
 		c.JSON(200, gin.H{"status": false, "msg": "信息不完整"})
 		return
 	}
-	id := bson.NewObjectId()
-	err := insertC("video", bson.M{"_id": id, "title": collection.Title, "owner": bson.ObjectIdHex(c.MustGet("auth").(string)), "tags": collection.Tags, "desc": collection.Desc, "price": collection.Price, "date": fmt.Sprintf("%d", time.Now().Unix()), "view": 0})
+	collection.ID = bson.NewObjectId()
+	collection.Owner = bson.ObjectIdHex(c.MustGet("auth").(string))
+	collection.Date = time.Now().Unix()
+	collection.View = 0
+	err := insertC("video", collection)
 
 	if err != nil {
 		log.Println(err.Error())
 		c.JSON(200, gin.H{"status": false, "msg": "数据库错误"})
 		return
 	}
-	c.JSON(200, gin.H{"status": true, "cid": id, "msg": "创建专辑成功"})
+	c.JSON(200, gin.H{"status": true, "cid": collection.ID, "msg": "创建专辑成功"})
 	return
 }
 
@@ -118,9 +120,9 @@ func addVideo(c *gin.Context) {
 			return
 		}
 		if collec.Cover != "" {
-			err = updateC("video", bson.M{"_id": vid.Cid}, bson.M{"$push": bson.M{"videos": bson.M{"date": fmt.Sprintf("%d", time.Now().Unix()), "title": vid.Title, "_id": vid.Vid, "desc": vid.Desc, "cover": path, "path": tp}}})
+			err = updateC("video", bson.M{"_id": vid.Cid}, bson.M{"$push": bson.M{"videos": bson.M{"date": time.Now().Unix(), "title": vid.Title, "_id": vid.Vid, "desc": vid.Desc, "cover": path, "path": tp}}})
 		} else {
-			err = updateC("video", bson.M{"_id": vid.Cid}, bson.M{"$push": bson.M{"videos": bson.M{"date": fmt.Sprintf("%d", time.Now().Unix()), "title": vid.Title, "_id": vid.Vid, "desc": vid.Desc, "cover": path, "path": tp}}, "$set": bson.M{"cover": path}})
+			err = updateC("video", bson.M{"_id": vid.Cid}, bson.M{"$push": bson.M{"videos": bson.M{"date": time.Now().Unix(), "title": vid.Title, "_id": vid.Vid, "desc": vid.Desc, "cover": path, "path": tp}}, "$set": bson.M{"cover": path}})
 		}
 		if err != nil {
 			log.Println(err)

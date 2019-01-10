@@ -31,7 +31,7 @@ func findC(col string, query interface{}, isall bool, result interface{}) error 
 	s := initSession.Copy()
 	defer s.Close()
 	if isall {
-		return s.DB("mist").C(col).Find(query).All(result)
+		return s.DB("mist").C(col).Find(query).Sort("-_id").All(result)
 	}
 	return s.DB("mist").C(col).Find(query).One(result)
 }

@@ -1,12 +1,9 @@
 package main
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/globalsign/mgo/bson"
 	"log"
-	"os"
-	"path/filepath"
 	"time"
 )
 
@@ -28,21 +25,22 @@ func uploadImage(c *gin.Context) {
 	return
 }
 func addCircle(c *gin.Context) {
-	var collection circleModel
-	if err := c.ShouldBind(&collection); err != nil {
-		log.Println(err)
+	var collection outCircleModel
+	c.ShouldBind(&collection)
+	if len(collection.Pics) == 0 && len(collection.Content) == 0 {
 		c.JSON(200, gin.H{"status": false, "msg": "信息不完整"})
 		return
 	}
-	id := bson.NewObjectId()
-	err := insertC("community", bson.M{"_id": id, "cont": collection.Content, "owner": bson.ObjectIdHex(c.MustGet("auth").(string)), "pics": collection.Pics, "date": fmt.Sprintf("%d", time.Now().Unix())})
-
+	collection.ID = bson.NewObjectId()
+	collection.Date = time.Now().Unix()
+	collection.Owner = bson.ObjectIdHex(c.MustGet("auth").(string))
+	err := insertC("community", collection)
 	if err != nil {
 		log.Println(err.Error())
 		c.JSON(200, gin.H{"status": false, "msg": "数据库错误"})
 		return
 	}
-	c.JSON(200, gin.H{"status": true, "cid": id, "msg": "发布成功"})
+	c.JSON(200, gin.H{"status": true, "cid": collection.ID, "msg": "发布成功"})
 	return
 }
 
@@ -63,7 +61,7 @@ func latestCircle(c *gin.Context) {
 	return
 }
 func myCommAll(c *gin.Context) {
-	var re []myCircleModel
+	var re []circleModel
 	err := findC("community", bson.M{"owner": bson.ObjectIdHex(c.MustGet("auth").(string))}, true, &re)
 	if err != nil {
 		c.JSON(200, false)
@@ -85,11 +83,11 @@ func delcomms(c *gin.Context) {
 		c.JSON(200, gin.H{"status": false, "msg": err.Error()})
 		return
 	}
-	log.Println(re)
-	for _, val := range re.Pics {
-		os.Remove(globalConf.ResDir + "/community/" + filepath.Base(val))
-		os.Remove(globalConf.ResDir + "/community/" + filepath.Base(val) + "_thb.jpeg")
-	}
+	// log.Println(re)
+	// for _, val := range re.Pics {
+	// 	os.Remove(globalConf.ResDir + "/community/" + filepath.Base(val))
+	// 	os.Remove(globalConf.ResDir + "/community/" + filepath.Base(val) + "_thb.jpeg")
+	// }
 	c.JSON(200, gin.H{"status": true, "msg": "删除状态成功"})
 	return
 }
