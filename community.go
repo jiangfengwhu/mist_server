@@ -60,9 +60,14 @@ func latestCircle(c *gin.Context) {
 	c.JSON(200, re)
 	return
 }
-func myCommAll(c *gin.Context) {
+func commAll(c *gin.Context) {
+	id := c.Param("id")
+	if len(id) != 24 {
+		c.JSON(200, "wrong id")
+		return
+	}
 	var re []circleModel
-	err := findC("community", bson.M{"owner": bson.ObjectIdHex(c.MustGet("auth").(string))}, true, &re)
+	err := findC("community", bson.M{"owner": bson.ObjectIdHex(id)}, true, &re)
 	if err != nil {
 		c.JSON(200, false)
 		return

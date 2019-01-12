@@ -12,8 +12,9 @@ type registModel struct {
 	Token  string `json:"token" binding:"required"`
 }
 type basicUserModel struct {
-	Name   string `bson:"nickName" json:"nickName"`
-	Avatar string `bson:"avatar" json:"avatar,omitempty"`
+	Name   string        `bson:"nickName" json:"nickName"`
+	Avatar string        `bson:"avatar" json:"avatar,omitempty"`
+	ID     bson.ObjectId `bson:"_id" json:"uid"`
 }
 type changeInfoModel struct {
 	Name string `bson:"nickName" json:"nickName" binding:"required"`

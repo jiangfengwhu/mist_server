@@ -202,9 +202,14 @@ func getVideo(c *gin.Context) {
 		col.Update(bson.M{"_id": bson.ObjectIdHex(c.Param("id"))}, bson.M{"$inc": bson.M{"view": 1}})
 	})
 }
-func myVideoAll(c *gin.Context) {
+func videoAll(c *gin.Context) {
+	id := c.Param("id")
+	if len(id) != 24 {
+		c.JSON(200, "wrong id")
+		return
+	}
 	var re []myVCModel
-	err := findC("video", bson.M{"owner": bson.ObjectIdHex(c.MustGet("auth").(string))}, true, &re)
+	err := findC("video", bson.M{"owner": bson.ObjectIdHex(id)}, true, &re)
 	if err != nil {
 		c.JSON(200, false)
 		return
@@ -271,7 +276,7 @@ func updateVC(c *gin.Context) {
 	}
 	err := updateC("video", bson.M{"_id": vc.ID, "owner": bson.ObjectIdHex(c.MustGet("auth").(string))}, bson.M{"$set": bson.M{"tags": vc.Tags, "desc": vc.Desc, "price": vc.Price, "title": vc.Title}})
 	if err != nil {
-		c.JSON(200, gin.H{"status": false, "msg": "数据库错误"})
+		c.JSON(200, gin.H{"status": false, "msg": err.Error()})
 		return
 	}
 	c.JSON(200, gin.H{"status": true, "msg": "更新专辑成功"})

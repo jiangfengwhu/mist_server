@@ -265,3 +265,18 @@ func updateInfo(c *gin.Context) {
 	c.JSON(200, gin.H{"status": true, "msg": "更新个人信息成功"})
 	return
 }
+func getUser(c *gin.Context) {
+	id := c.Param("id")
+	if len(id) != 24 {
+		c.JSON(404, "wrong id")
+		return
+	}
+	var user loginDBModel
+	err := findC("user", bson.M{"_id": bson.ObjectIdHex(id)}, false, &user)
+	if err != nil {
+		c.JSON(404, false)
+		return
+	}
+	c.JSON(200, user)
+	return
+}
