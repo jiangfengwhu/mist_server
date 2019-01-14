@@ -17,8 +17,10 @@ type basicUserModel struct {
 	ID     bson.ObjectId `bson:"_id" json:"uid"`
 }
 type changeInfoModel struct {
-	Name string `bson:"nickName" json:"nickName" binding:"required"`
-	Sign string `bson:"sign,omitempty" json:"sign,omitempty"`
+	Name     string `bson:"nickName" json:"nickName" binding:"required"`
+	Sign     string `bson:"sign,omitempty" json:"sign,omitempty"`
+	Dirth    string `json:"birth,omitempty" bson:"birth,omitempty"`
+	Homepage string `json:"homepage,omitempty" bson:"homepage,omitempty"`
 }
 
 type reCapResponseModel struct {
@@ -44,17 +46,23 @@ type loginModel struct {
 	Passwd string `json:"passwd" bson:"passwd" binding:"required"`
 	Token  string `json:"token" binding:"required"`
 }
-
+type detailUserModel struct {
+	ID       bson.ObjectId `json:"uid" bson:"_id"`
+	Name     string        `json:"nickName" bson:"nickName"`
+	Avatar   string        `json:"avatar,omitempty" bson:"avatar"`
+	ProPic   string        `json:"profilePic,omitempty" bson:"profilePic"`
+	Sign     string        `json:"sign,omitempty" bson:"sign,omitempty"`
+	Gloden   string        `json:"golden,omitempty" bson:"golden,omitempty"`
+	Jointime int64         `json:"jd" bson:"jd"`
+	Authed   bool          `json:"authed,omitempty"`
+	Dirth    string        `json:"birth,omitempty" bson:"birth,omitempty"`
+	Homepage string        `json:"homepage,omitempty" bson:"homepage,omitempty"`
+}
 type loginDBModel struct {
-	Email      string        `json:"-" bson:"email"`
-	Passwd     string        `json:"-" bson:"passwd"`
-	ActiveCode string        `json:"-" bson:"activeCode"`
-	ID         bson.ObjectId `json:"uid" bson:"_id"`
-	Name       string        `json:"nickName" bson:"nickName"`
-	Avatar     string        `json:"avatar,omitempty" bson:"avatar"`
-	ProPic     string        `json:"profilePic,omitempty" bson:"profilePic"`
-	Sign       string        `json:"sign,omitempty" bson:"sign,omitempty"`
-	Gloden     string        `json:"golden,omitempty" bson:"golden,omitempty"`
+	basicUserModel `bson:",inline"`
+	Email          string `json:"-" bson:"email"`
+	Passwd         string `json:"-" bson:"passwd"`
+	ActiveCode     string `json:"-" bson:"activeCode"`
 }
 type vcScalfold struct {
 	Title string   `bson:"title" json:"title" binding:"required"`

@@ -116,7 +116,7 @@ func activeAccount(c *gin.Context) {
 			c.JSON(200, gin.H{"msg": "链接失效", "status": false})
 			return
 		} else if re.ActiveCode == user.ActiveCode {
-			err := col.Update(bson.M{"email": user.Email}, bson.M{"$unset": bson.M{"expireDate": "", "activeCode": ""}})
+			err := col.Update(bson.M{"email": user.Email}, bson.M{"$unset": bson.M{"expireDate": "", "activeCode": ""}, "$set": bson.M{"jd": time.Now().Unix()}})
 			if err != nil {
 				c.JSON(200, gin.H{"msg": err.Error(), "status": false})
 				return
@@ -177,7 +177,7 @@ func logstatus(c *gin.Context) {
 		return
 	}
 	if val, ok := ses["uid"]; ok && val != nil {
-		var re loginDBModel
+		var re basicUserModel
 		err := pipiC("user", []bson.M{{"$match": bson.M{"_id": bson.ObjectIdHex(val.(string))}}}, &re, false)
 		if err != nil {
 			log.Println(err.Error())
@@ -257,6 +257,7 @@ func updateInfo(c *gin.Context) {
 		c.JSON(200, gin.H{"status": false, "msg": "信息不完整"})
 		return
 	}
+	log.Println(cinfo)
 	err := updateC("user", bson.M{"_id": bson.ObjectIdHex(c.MustGet("auth").(string))}, bson.M{"$set": cinfo})
 	if err != nil {
 		c.JSON(200, gin.H{"status": false, "msg": "数据库错误"})
@@ -271,12 +272,14 @@ func getUser(c *gin.Context) {
 		c.JSON(404, "wrong id")
 		return
 	}
-	var user loginDBModel
+	var user detailUserModel
 	err := findC("user", bson.M{"_id": bson.ObjectIdHex(id)}, false, &user)
 	if err != nil {
 		c.JSON(404, false)
 		return
 	}
+	re, err := getSession(c)
+	user.Authed = re["uid"] == id
 	c.JSON(200, user)
 	return
 }

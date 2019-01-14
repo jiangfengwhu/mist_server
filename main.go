@@ -31,6 +31,7 @@ func main() {
 	api.POST("changeAvatar", Auth(), changepic)
 	api.GET("myvideo", Auth(), myVideo)
 	api.PUT("delvideoc", Auth(), delvideoc)
+	api.GET("checkvown/:id", Auth(), checkOWN)
 	api.PUT("updatevc", Auth(), updateVC)
 	api.PUT("updatevideo", Auth(), updateVideo)
 	api.DELETE("delvideo", Auth(), delvideo)

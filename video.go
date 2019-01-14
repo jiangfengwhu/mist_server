@@ -299,7 +299,21 @@ func updateVideo(c *gin.Context) {
 	c.JSON(200, gin.H{"status": true, "msg": "更新视频信息成功"})
 	return
 }
-
+func checkOWN(c *gin.Context) {
+	id := c.Param("id")
+	num, err := getCount("video", bson.M{"_id": bson.ObjectIdHex(id), "owner": bson.ObjectIdHex(c.MustGet("auth").(string))})
+	if err != nil {
+		log.Println(err.Error())
+		c.JSON(200, false)
+		return
+	}
+	if num == 0 {
+		c.JSON(200, false)
+		return
+	}
+	c.JSON(200, true)
+	return
+}
 func delvideo(c *gin.Context) {
 	var params delVideoQ
 	if err := c.ShouldBindQuery(&params); err != nil {
