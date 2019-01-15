@@ -37,7 +37,7 @@ func mktorrent(tpid string) (string, error) {
 		return "", err
 	}
 	// cmd1 := strings.Fields("create-torrent " + id + ".mp4 --pieceLength=734003 --announce=" + globalConf.Announce + " --urlList=" + globalConf.Host + globalConf.ResRef + "/video/" + tpid + ".mp4 -o " + id + ".torrent")
-	cmd1 := strings.Fields("ffmpeg -i " + id + ".mp4 -c copy -f dash -window_size 0 -seg_duration 10 -init_seg_name " + tpid + "init$RepresentationID$.m4s -media_seg_name " + tpid + "$RepresentationID$-$Number%05d$.m4s -use_template 0 -bsf:a aac_adtstoasc " + id + ".mpd")
+	cmd1 := strings.Fields("ffmpeg -i " + id + ".mp4 -c copy -f dash -window_size 0 -seg_duration 6 -init_seg_name " + tpid + "init$RepresentationID$.m4s -media_seg_name " + tpid + "$RepresentationID$-$Number%05d$.m4s -use_template 0 -bsf:a aac_adtstoasc " + id + ".mpd")
 	prc1 := exec.Command(cmd1[0], cmd1[1:]...)
 	err = prc1.Run()
 	if err != nil {
@@ -76,9 +76,4 @@ func strtoobj(inp []string) []bson.ObjectId {
 		re = append(re, bson.ObjectIdHex(val))
 	}
 	return re
-}
-
-func splitPath(inp string) string {
-	filepaths := strings.Split(inp, "/")
-	return filepaths[len(filepaths)-1]
 }

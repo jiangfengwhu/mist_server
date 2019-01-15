@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"path/filepath"
 	"time"
 )
 
@@ -258,9 +259,16 @@ func delvideoc(c *gin.Context) {
 		}
 		for _, vc := range dels {
 			for _, video := range vc.Videos {
-				os.Remove(globalConf.ResDir + "/video/" + splitPath(video.Cover))
-				os.Remove(globalConf.ResDir + "/video/" + splitPath(video.Path))
-				os.Remove(globalConf.ResDir + "/video/" + video.ID + ".mp4")
+				os.Remove(globalConf.ResDir + "/video/" + filepath.Base(video.Cover))
+				vs, err := filepath.Glob(globalConf.ResDir + "/video/" + video.ID + "*")
+				if err != nil {
+					log.Println(err.Error())
+					c.JSON(200, gin.H{"msg": "删除文件错误", "status": false})
+					return
+				}
+				for _, v := range vs {
+					os.Remove(v)
+				}
 			}
 		}
 		c.JSON(200, gin.H{"msg": "删除专辑成功", "status": true})
@@ -326,9 +334,16 @@ func delvideo(c *gin.Context) {
 		c.JSON(200, gin.H{"status": false, "msg": err.Error()})
 		return
 	}
-	os.Remove(globalConf.ResDir + "/video/" + params.Vid + ".mp4")
-	os.Remove(globalConf.ResDir + "/video/" + params.Vid + ".torrent")
 	os.Remove(globalConf.ResDir + "/video/" + params.Cover)
+	vs, err := filepath.Glob(globalConf.ResDir + "/video/" + params.Vid + "*")
+	if err != nil {
+		log.Println(err.Error())
+		c.JSON(200, gin.H{"msg": "删除文件错误", "status": false})
+		return
+	}
+	for _, v := range vs {
+		os.Remove(v)
+	}
 	c.JSON(200, gin.H{"status": true, "msg": "删除视频成功"})
 	return
 }

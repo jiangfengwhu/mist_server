@@ -41,5 +41,5 @@ func main() {
 	api.GET("getCircles", latestCircle)
 	api.GET("commall/:id", commAll)
 	api.DELETE("delcomms/:id", Auth(), delcomms)
-	r.Run(":3000")
+	r.Run(":3001")
 }
