@@ -113,7 +113,7 @@ func addVideo(c *gin.Context) {
 			c.JSON(200, gin.H{"status": false, "msg": err})
 			return
 		}
-		path, err := capCover(vid.Vid, "5")
+		path, err := capCover(vid.Vid, "3")
 		if err != nil {
 			log.Println(err)
 			c.JSON(200, gin.H{"status": false, "msg": err})
