@@ -136,3 +136,25 @@ type outCircleModel struct {
 	Owner       bson.ObjectId  `bson:"owner" json:"-"`
 	OwnerDoc    basicUserModel `bson:"owner_doc,omitempty" json:"owner"`
 }
+type commentModel struct {
+	Owner   bson.ObjectId `bson:"owner" json:"owner"`
+	Content string        `bson:"text" json:"text"`
+	Date    int64         `bson:"date" json:"date"`
+	Reply   int           `bson:"comments,omitempty" json:"reply,omitempty"`
+	At      string        `bson:"at,omitempty" json:"at,omitempty"`
+	ID      bson.ObjectId `bson:"_id" json:"id"`
+}
+type outCommentModel struct {
+	CommentsDoc []commentModel   `bson:"comments_doc,omitempty" json:"comments,omitempty"`
+	Owners      []basicUserModel `bson:"owners_doc,omitempty" json:"owners,omitempty"`
+}
+type postCommentModel struct {
+	ID      string `json:"id" binding:"required"`
+	Content string `json:"text" binding:"required"`
+	Type    string `json:"type" binding:"required"`
+	At      string `json:"at"`
+}
+type getCommentsModel struct {
+	ID   string `bson:"_id" form:"id" binding:"required"`
+	Type string `form:"type" binding:"required"`
+}
