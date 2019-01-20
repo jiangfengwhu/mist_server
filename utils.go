@@ -14,7 +14,6 @@ import (
 var lookowner = bson.M{"$lookup": bson.M{"from": "user", "localField": "owner", "foreignField": "_id", "as": "owner_doc"}}
 var unwind = bson.M{"$unwind": "$owner_doc"}
 var lookcomments = bson.M{"$lookup": bson.M{"from": "comment", "localField": "comments", "foreignField": "_id", "as": "comments_doc"}}
-var lookreplycount = bson.M{"$addFields": bson.M{"comments_doc": bson.M{"$map": bson.M{"input": "$comments_doc", "as": "item", "in": bson.M{"comments": bson.M{"$cond": bson.M{"if": bson.M{"$isArray": "$$item.comments"}, "then": bson.M{"$size": "$$item.comments"}, "else": 0}}, "_id": "$$item._id", "text": "$$item.text", "date": "$$item.date", "owner": "$$item.owner", "at": "$$item.at"}}}}}
 var lookcomowner = bson.M{"$lookup": bson.M{"from": "user", "localField": "comments_doc.owner", "foreignField": "_id", "as": "owners_doc"}}
 
 func getMd5(filename string) (string, error) {

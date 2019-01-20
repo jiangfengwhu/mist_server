@@ -33,6 +33,21 @@ func Auth() func(c *gin.Context) {
 	}
 }
 
+// CheckGuest is get info m
+func CheckGuest() func(c *gin.Context) {
+	return func(c *gin.Context) {
+		re, err := getSession(c)
+		if err != nil {
+			c.AbortWithStatus(http.StatusBadGateway)
+			return
+		}
+		if val, ok := re["uid"]; !(ok && val != nil) {
+			c.Set("auth", "guest")
+			return
+		}
+		c.Set("auth", re["uid"])
+	}
+}
 func verifyCap(tk string) (*reCapResponseModel, error) {
 	resp, err := http.PostForm("https://www.google.com/recaptcha/api/siteverify", url.Values{
 		"secret":   {globalConf.RecapSecure},

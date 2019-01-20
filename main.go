@@ -27,7 +27,7 @@ func main() {
 	api.POST("addVideo", Auth(), addVideo)
 	api.POST("changeVC", Auth(), changeCover)
 	api.GET("getVideo", latestVideo)
-	api.GET("getVideo/:id", getVideo)
+	api.GET("getVideo/:id", CheckGuest(), getVideo)
 	api.POST("changeAvatar", Auth(), changepic)
 	api.GET("myvideo", Auth(), myVideo)
 	api.PUT("delvideoc", Auth(), delvideoc)
@@ -42,6 +42,7 @@ func main() {
 	api.GET("commall/:id", commAll)
 	api.DELETE("delcomms/:id", Auth(), delcomms)
 	api.POST("addComment", Auth(), addComment)
-	api.GET("getcomments", getComments)
+	api.GET("getcomments", CheckGuest(), getComments)
+	api.POST("like", Auth(), setLike)
 	r.Run(":3030")
 }

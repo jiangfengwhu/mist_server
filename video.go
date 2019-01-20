@@ -121,9 +121,9 @@ func addVideo(c *gin.Context) {
 			return
 		}
 		if collec.Cover != "" {
-			err = updateC("video", bson.M{"_id": vid.Cid}, bson.M{"$push": bson.M{"videos": bson.M{"date": time.Now().Unix(), "title": vid.Title, "_id": vid.Vid, "desc": vid.Desc, "cover": path, "path": tp}}})
+			err = updateC("video", bson.M{"_id": vid.Cid}, bson.M{"$addToSet": bson.M{"videos": bson.M{"date": time.Now().Unix(), "title": vid.Title, "_id": vid.Vid, "desc": vid.Desc, "cover": path, "path": tp}}})
 		} else {
-			err = updateC("video", bson.M{"_id": vid.Cid}, bson.M{"$push": bson.M{"videos": bson.M{"date": time.Now().Unix(), "title": vid.Title, "_id": vid.Vid, "desc": vid.Desc, "cover": path, "path": tp}}, "$set": bson.M{"cover": path}})
+			err = updateC("video", bson.M{"_id": vid.Cid}, bson.M{"$addToSet": bson.M{"videos": bson.M{"date": time.Now().Unix(), "title": vid.Title, "_id": vid.Vid, "desc": vid.Desc, "cover": path, "path": tp}}, "$set": bson.M{"cover": path}})
 		}
 		if err != nil {
 			log.Println(err)
@@ -173,7 +173,9 @@ func latestVideo(c *gin.Context) {
 	empty := []string{}
 	var re []basicVCModel
 	log.Println(*params.Start*params.Size, *params.Start*(params.Size+1))
-	err := latestC("video", []bson.M{{"$match": bson.M{"videos": bson.M{"$exists": true, "$ne": empty}}}}, *params.Start*params.Size, params.Size*(*params.Start+1), &re)
+	notempty := bson.M{"$match": bson.M{"videos": bson.M{"$exists": true, "$ne": empty}}}
+	commentslength := bson.M{"$addFields": bson.M{"comments_length": bson.M{"$cond": bson.M{"if": bson.M{"$isArray": "$comments"}, "then": bson.M{"$size": "$comments"}, "else": 0}}}}
+	err := latestC("video", []bson.M{notempty, commentslength}, *params.Start*params.Size, params.Size*(*params.Start+1), &re)
 	if err != nil {
 		c.JSON(200, false)
 		return
@@ -190,10 +192,12 @@ func getVideo(c *gin.Context) {
 	}
 	var re outVideoModel
 	handleVideo(func(col *mgo.Collection) {
+		likeslength := bson.M{"$addFields": bson.M{"likes_length": bson.M{"$size": bson.M{"$ifNull": []interface{}{"$likes", []string{}}}}, "isLiked": bson.M{"$in": []interface{}{c.MustGet("auth").(string), bson.M{"$ifNull": []interface{}{"$likes", []string{}}}}}}}
 		err := col.Pipe([]bson.M{
 			{"$match": bson.M{"_id": bson.ObjectIdHex(c.Param("id"))}},
 			lookowner,
 			unwind,
+			likeslength,
 		}).One(&re)
 		if err != nil {
 			c.JSON(200, false)

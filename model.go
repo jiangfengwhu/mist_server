@@ -65,13 +65,14 @@ type loginDBModel struct {
 	ActiveCode     string `json:"-" bson:"activeCode"`
 }
 type vcScalfold struct {
-	Title string   `bson:"title" json:"title" binding:"required"`
-	Price *int     `bson:"price" json:"price" binding:"exists"`
-	Desc  string   `bson:"desc" json:"desc"`
-	Tags  []string `bson:"tags" json:"tags" binding:"required"`
-	Cover string   `bson:"cover" json:"cover"`
-	Date  int64    `bson:"date" json:"date"`
-	View  int64    `bson:"view" json:"view"`
+	Title    string   `bson:"title" json:"title" binding:"required"`
+	Price    *int     `bson:"price" json:"price" binding:"exists"`
+	Desc     string   `bson:"desc" json:"desc"`
+	Tags     []string `bson:"tags" json:"tags" binding:"required"`
+	Cover    string   `bson:"cover" json:"cover"`
+	Date     int64    `bson:"date" json:"date"`
+	View     int64    `bson:"view" json:"view"`
+	Comments int64    `bson:"comments_length,omitempty" json:"comments"`
 }
 type myVCModel struct {
 	vcScalfold `bson:",inline"`
@@ -82,6 +83,8 @@ type basicVCModel struct {
 	ID         bson.ObjectId  `bson:"_id" json:"id"`
 	Owner      bson.ObjectId  `bson:"owner" json:"-"`
 	OwnerDoc   basicUserModel `bson:"owner_doc,omitempty" json:"owner"`
+	Likes      int64          `bson:"likes_length,omitempty" json:"likes,omitempty"`
+	IsLiked    bool           `bson:"isLiked,omitempty" json:"isliked,omitempty"`
 }
 type basicVideoModel struct {
 	Title string `bson:"title" json:"title"`
@@ -143,6 +146,8 @@ type commentModel struct {
 	Reply   int           `bson:"comments,omitempty" json:"reply,omitempty"`
 	At      string        `bson:"at,omitempty" json:"at,omitempty"`
 	ID      bson.ObjectId `bson:"_id" json:"id"`
+	Likes   int64         `bson:"likes_length,omitempty" json:"likes,omitempty"`
+	IsLiked bool          `bson:"isLiked,omitempty" json:"isliked,omitempty"`
 }
 type outCommentModel struct {
 	CommentsDoc []commentModel   `bson:"comments_doc,omitempty" json:"comments,omitempty"`
@@ -157,4 +162,9 @@ type postCommentModel struct {
 type getCommentsModel struct {
 	ID   string `bson:"_id" form:"id" binding:"required"`
 	Type string `form:"type" binding:"required"`
+}
+type likeModel struct {
+	ID   string `bson:"_id" form:"id" binding:"required"`
+	Type string `form:"type" binding:"required"`
+	Inc  *int8  `form:"inc" binding:"exists"`
 }
