@@ -72,19 +72,18 @@ type vcScalfold struct {
 	Cover    string   `bson:"cover" json:"cover"`
 	Date     int64    `bson:"date" json:"date"`
 	View     int64    `bson:"view" json:"view"`
-	Comments int64    `bson:"comments_length,omitempty" json:"comments"`
+	Comments int64    `bson:"comments_length,omitempty" json:"comments,omitempty"`
 }
 type myVCModel struct {
 	vcScalfold `bson:",inline"`
 	ID         bson.ObjectId `bson:"_id" json:"id" binding:"required"`
 }
 type basicVCModel struct {
-	vcScalfold `bson:",inline"`
-	ID         bson.ObjectId  `bson:"_id" json:"id"`
-	Owner      bson.ObjectId  `bson:"owner" json:"-"`
-	OwnerDoc   basicUserModel `bson:"owner_doc,omitempty" json:"owner"`
-	Likes      int64          `bson:"likes_length,omitempty" json:"likes,omitempty"`
-	IsLiked    bool           `bson:"isLiked,omitempty" json:"isliked,omitempty"`
+	vcScalfold   `bson:",inline"`
+	ID           bson.ObjectId  `bson:"_id" json:"id"`
+	Owner        bson.ObjectId  `bson:"owner" json:"-"`
+	OwnerDoc     basicUserModel `bson:"owner_doc,omitempty" json:"owner"`
+	outLikeModel `bson:",inline"`
 }
 type basicVideoModel struct {
 	Title string `bson:"title" json:"title"`
@@ -135,19 +134,20 @@ type circleModel struct {
 	Date    int64         `bson:"date" json:"date"`
 }
 type outCircleModel struct {
-	circleModel `bson:",inline"`
-	Owner       bson.ObjectId  `bson:"owner" json:"-"`
-	OwnerDoc    basicUserModel `bson:"owner_doc,omitempty" json:"owner"`
+	circleModel  `bson:",inline"`
+	Owner        bson.ObjectId  `bson:"owner" json:"-"`
+	OwnerDoc     basicUserModel `bson:"owner_doc,omitempty" json:"owner"`
+	outLikeModel `bson:",inline"`
+	Comments     int64 `bson:"comments_length,omitempty" json:"comments,omitempty"`
 }
 type commentModel struct {
-	Owner   bson.ObjectId `bson:"owner" json:"owner"`
-	Content string        `bson:"text" json:"text"`
-	Date    int64         `bson:"date" json:"date"`
-	Reply   int           `bson:"comments,omitempty" json:"reply,omitempty"`
-	At      string        `bson:"at,omitempty" json:"at,omitempty"`
-	ID      bson.ObjectId `bson:"_id" json:"id"`
-	Likes   int64         `bson:"likes_length,omitempty" json:"likes,omitempty"`
-	IsLiked bool          `bson:"isLiked,omitempty" json:"isliked,omitempty"`
+	Owner        bson.ObjectId `bson:"owner" json:"owner"`
+	Content      string        `bson:"text" json:"text"`
+	Date         int64         `bson:"date" json:"date"`
+	Reply        int           `bson:"comments,omitempty" json:"reply,omitempty"`
+	At           string        `bson:"at,omitempty" json:"at,omitempty"`
+	ID           bson.ObjectId `bson:"_id" json:"id"`
+	outLikeModel `bson:",inline"`
 }
 type outCommentModel struct {
 	CommentsDoc []commentModel   `bson:"comments_doc,omitempty" json:"comments,omitempty"`
@@ -162,6 +162,10 @@ type postCommentModel struct {
 type getCommentsModel struct {
 	ID   string `bson:"_id" form:"id" binding:"required"`
 	Type string `form:"type" binding:"required"`
+}
+type outLikeModel struct {
+	Likes   int64 `bson:"likes_length,omitempty" json:"likes,omitempty"`
+	IsLiked bool  `bson:"isLiked,omitempty" json:"isliked,omitempty"`
 }
 type likeModel struct {
 	ID   string `bson:"_id" form:"id" binding:"required"`

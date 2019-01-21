@@ -52,7 +52,8 @@ func latestCircle(c *gin.Context) {
 	}
 	var re []outCircleModel
 	log.Println(*params.Start*params.Size, *params.Start*(params.Size+1))
-	err := latestC("community", []bson.M{}, *params.Start*params.Size, params.Size*(*params.Start+1), &re)
+	commentslength := bson.M{"$addFields": bson.M{"comments_length": bson.M{"$size": bson.M{"$ifNull": []interface{}{"$comments", []string{}}}}, "likes_length": bson.M{"$size": bson.M{"$ifNull": []interface{}{"$likes", []string{}}}}, "isLiked": bson.M{"$in": []interface{}{c.MustGet("auth").(string), bson.M{"$ifNull": []interface{}{"$likes", []string{}}}}}}}
+	err := latestC("community", []bson.M{commentslength}, *params.Start*params.Size, params.Size*(*params.Start+1), &re)
 	if err != nil {
 		c.JSON(200, false)
 		return

@@ -49,7 +49,7 @@ func CheckGuest() func(c *gin.Context) {
 	}
 }
 func verifyCap(tk string) (*reCapResponseModel, error) {
-	resp, err := http.PostForm("https://www.google.com/recaptcha/api/siteverify", url.Values{
+	resp, err := http.PostForm(globalConf.RecapServer, url.Values{
 		"secret":   {globalConf.RecapSecure},
 		"response": {tk},
 	})

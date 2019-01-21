@@ -174,7 +174,7 @@ func latestVideo(c *gin.Context) {
 	var re []basicVCModel
 	log.Println(*params.Start*params.Size, *params.Start*(params.Size+1))
 	notempty := bson.M{"$match": bson.M{"videos": bson.M{"$exists": true, "$ne": empty}}}
-	commentslength := bson.M{"$addFields": bson.M{"comments_length": bson.M{"$cond": bson.M{"if": bson.M{"$isArray": "$comments"}, "then": bson.M{"$size": "$comments"}, "else": 0}}}}
+	commentslength := bson.M{"$addFields": bson.M{"comments_length": bson.M{"$size": bson.M{"$ifNull": []interface{}{"$comments", []string{}}}}, "likes_length": bson.M{"$size": bson.M{"$ifNull": []interface{}{"$likes", []string{}}}}}}
 	err := latestC("video", []bson.M{notempty, commentslength}, *params.Start*params.Size, params.Size*(*params.Start+1), &re)
 	if err != nil {
 		c.JSON(200, false)

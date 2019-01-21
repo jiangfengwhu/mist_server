@@ -38,7 +38,7 @@ func main() {
 	api.GET("videoall/:id", videoAll)
 	api.POST("uploadImage", Auth(), uploadImage)
 	api.POST("addCircle", Auth(), addCircle)
-	api.GET("getCircles", latestCircle)
+	api.GET("getCircles", CheckGuest(), latestCircle)
 	api.GET("commall/:id", commAll)
 	api.DELETE("delcomms/:id", Auth(), delcomms)
 	api.POST("addComment", Auth(), addComment)

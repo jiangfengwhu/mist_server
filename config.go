@@ -14,6 +14,7 @@ type configModel struct {
 	ResDir      string `json:"resourcedir"`
 	ResRef      string `json:"resref"`
 	Announce    string `json:"announce"`
+	RecapServer string `json:"recapServer"`
 }
 
 func getConfig() {
