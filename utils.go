@@ -40,7 +40,7 @@ func mktorrent(tpid string) (string, error) {
 	// }
 	// cmd1 := strings.Fields("create-torrent " + id + ".mp4 --pieceLength=734003 --announce=" + globalConf.Announce + " --urlList=" + globalConf.Host + globalConf.ResRef + "/video/" + tpid + ".mp4 -o " + id + ".torrent")
 	// cmd1 := strings.Fields("ffmpeg -i " + id + ".mp4 -c copy -f dash -window_size 0 -seg_duration 5 -init_seg_name " + tpid + "init$RepresentationID$.m4s -media_seg_name " + tpid + "$RepresentationID$-$Number%05d$.m4s -use_template 0 -bsf:a aac_adtstoasc " + id + ".mpd")
-	cmd1 := strings.Fields("ffmpeg -i " + id + " -codec copy -vbsf h264_mp4toannexb -map 0 -f segment -segment_list " + id + ".m3u8 -segment_time 10 " + id + "%03d.ts")
+	cmd1 := strings.Fields("ffmpeg -i " + id + " -movflags faststart -codec copy -map 0 -f segment -segment_list " + id + ".m3u8 -segment_time 10 " + id + "%03d.ts")
 	prc1 := exec.Command(cmd1[0], cmd1[1:]...)
 	err := prc1.Run()
 	if err != nil {

@@ -110,14 +110,14 @@ func addVideo(c *gin.Context) {
 		}
 		tp, err := mktorrent(vid.Vid)
 		if err != nil {
-			log.Println(err)
-			c.JSON(200, gin.H{"status": false, "msg": err})
+			log.Println(err.Error())
+			c.JSON(200, gin.H{"status": false, "msg": err.Error()})
 			return
 		}
 		path, err := capCover(vid.Vid, "3")
 		if err != nil {
 			log.Println(err)
-			c.JSON(200, gin.H{"status": false, "msg": err})
+			c.JSON(200, gin.H{"status": false, "msg": err.Error()})
 			return
 		}
 		if collec.Cover != "" {
@@ -126,7 +126,7 @@ func addVideo(c *gin.Context) {
 			err = updateC("video", bson.M{"_id": vid.Cid}, bson.M{"$addToSet": bson.M{"videos": bson.M{"date": time.Now().Unix(), "title": vid.Title, "_id": vid.Vid, "desc": vid.Desc, "cover": path, "path": tp}}, "$set": bson.M{"cover": path}})
 		}
 		if err != nil {
-			log.Println(err)
+			log.Println(err.Error())
 			c.JSON(200, gin.H{"status": false, "msg": err.Error()})
 			return
 		}
