@@ -13,6 +13,8 @@ func main() {
 	log.Println(globalConf.RecapSecure)
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
+	hub := newHub()
+	go hub.run()
 	api := r.Group("/api")
 	api.POST("regist", regist)
 	api.POST("login", login)
@@ -44,5 +46,8 @@ func main() {
 	api.POST("addComment", Auth(), addComment)
 	api.GET("getcomments", CheckGuest(), getComments)
 	api.POST("like", Auth(), setLike)
+	api.GET("chat/:id", CheckGuest(), func(c *gin.Context) {
+		serveWs(hub, c)
+	})
 	r.Run(":3030")
 }
