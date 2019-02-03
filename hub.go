@@ -1,14 +1,14 @@
 package main
 
 import (
-	"log"
 	"strconv"
 )
 
 // BroadCast is room config
 type BroadCast struct {
-	to  string
-	msg []byte
+	to   string
+	msg  []byte
+	from string
 }
 
 // Hub maintains the set of active clients and broadcasts messages to the
@@ -21,6 +21,9 @@ type Hub struct {
 	// Inbound messages from the clients.
 	broadcast chan *BroadCast
 
+	// except sender
+	broadcastTo chan *BroadCast
+
 	// Register requests from the clients.
 	register chan *Client
 
@@ -30,10 +33,11 @@ type Hub struct {
 
 func newHub() *Hub {
 	return &Hub{
-		broadcast:  make(chan *BroadCast),
-		register:   make(chan *Client),
-		unregister: make(chan *Client),
-		clients:    make(map[string]map[*Client]bool),
+		broadcast:   make(chan *BroadCast),
+		register:    make(chan *Client),
+		unregister:  make(chan *Client),
+		clients:     make(map[string]map[*Client]bool),
+		broadcastTo: make(chan *BroadCast),
 	}
 }
 
@@ -60,12 +64,22 @@ func (h *Hub) run() {
 			}
 		case message := <-h.broadcast:
 			for client := range h.clients[message.to] {
-				log.Println(client)
 				select {
 				case client.send <- message.msg:
 				default:
 					close(client.send)
 					delete(h.clients[client.room], client)
+				}
+			}
+		case message := <-h.broadcastTo:
+			for client := range h.clients[message.to] {
+				if client.id != message.from {
+					select {
+					case client.send <- message.msg:
+					default:
+						close(client.send)
+						delete(h.clients[client.room], client)
+					}
 				}
 			}
 		}

@@ -56,13 +56,6 @@ type Client struct {
 	send chan []byte
 }
 
-// Msg is message model
-type Msg struct {
-	Header string `json:"header"`
-	Body   string `json:"body"`
-	From   string `json:"from"`
-}
-
 // readPump pumps messages from the websocket connection to the hub.
 //
 // The application runs readPump in a per-connection goroutine. The application
@@ -80,7 +73,7 @@ func (c *Client) readPump() {
 		c.hub.unregister <- c
 		c.conn.Close()
 	}()
-	c.conn.SetReadLimit(maxMessageSize)
+	// c.conn.SetReadLimit(maxMessageSize)
 	c.conn.SetReadDeadline(time.Now().Add(pongWait))
 	c.conn.SetPongHandler(func(string) error { c.conn.SetReadDeadline(time.Now().Add(pongWait)); return nil })
 	for {
@@ -91,24 +84,53 @@ func (c *Client) readPump() {
 			}
 			break
 		}
-		var re Msg
+		var re map[string]interface{}
 		// msg := bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
 		json.Unmarshal(message, &re)
-		re.From = c.id
-		newmsg, _ := json.Marshal(&re)
-		// if re.Header == "open" {
-		// 	total := len(c.hub.clients[c.room])
-		// 	msg = []byte(`{"total":` + strconv.Itoa(total) + `, "header":"open", "from":"` + re.From + `"}`)
-		// }
-		// if re.Header == "close" {
-		// 	total := len(c.hub.clients[c.room]) - 1
-		// 	msg = []byte(`{"total":` + strconv.Itoa(total) + `, "header":"close", "from":"` + re.From + `"}`)
-		// }
-		tomessage := &BroadCast{
-			msg: newmsg,
-			to:  c.room,
+		re["from"] = c.id
+		msgHeader := re["header"].(string)
+		switch msgHeader {
+		case "create or join":
+			numClients := len(c.hub.clients[c.room])
+			if numClients == 1 {
+				re["header"] = "created"
+				re["body"] = c.room
+			} else if numClients == 2 {
+				re["header"] = "joined"
+				re["body"] = c.room
+			} else {
+				re["header"] = "full"
+				re["body"] = c.room
+			}
+			newmsg, _ := json.Marshal(&re)
+			tomessage := &BroadCast{
+				msg: newmsg,
+				to:  c.room,
+			}
+			c.hub.broadcast <- tomessage
+		case "ready", "candidate", "offer", "answer":
+			tomessage := &BroadCast{
+				msg:  message,
+				to:   c.room,
+				from: c.id,
+			}
+			c.hub.broadcastTo <- tomessage
+		case "text":
+			newmsg, _ := json.Marshal(&re)
+			tomessage := &BroadCast{
+				msg: newmsg,
+				to:  c.room,
+			}
+			c.hub.broadcast <- tomessage
+		default:
+			log.Println("default")
+			newmsg, _ := json.Marshal(&re)
+			tomessage := &BroadCast{
+				msg: newmsg,
+				to:  c.room,
+			}
+			c.hub.broadcast <- tomessage
 		}
-		c.hub.broadcast <- tomessage
 	}
 }
 
@@ -140,11 +162,11 @@ func (c *Client) writePump() {
 			w.Write(message)
 
 			// Add queued chat messages to the current websocket message.
-			n := len(c.send)
-			for i := 0; i < n; i++ {
-				w.Write(newline)
-				w.Write(<-c.send)
-			}
+			// n := len(c.send)
+			// for i := 0; i < n; i++ {
+			// 	w.Write(newline)
+			// 	w.Write(<-c.send)
+			// }
 
 			if err := w.Close(); err != nil {
 				return
