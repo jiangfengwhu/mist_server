@@ -27,8 +27,12 @@ func uploadImage(c *gin.Context) {
 func addCircle(c *gin.Context) {
 	var collection outCircleModel
 	c.ShouldBind(&collection)
-	if len(collection.Pics) == 0 && len(collection.Content) == 0 {
+	if len(collection.Pics) == 0 && len(collection.Content) == 0 && len(collection.Embed) == 0 {
 		c.JSON(200, gin.H{"status": false, "msg": "信息不完整"})
+		return
+	}
+	if len(collection.Pics) > 0 && len(collection.Embed) > 0 {
+		c.JSON(200, gin.H{"status": false, "msg": "视频和图片不能同时存在"})
 		return
 	}
 	collection.ID = bson.NewObjectId()

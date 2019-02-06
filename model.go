@@ -130,6 +130,7 @@ type delVideoQ struct {
 type circleModel struct {
 	ID      bson.ObjectId `bson:"_id" json:"id"`
 	Content string        `json:"cont,omitempty" bson:"cont,omitempty"`
+	Embed   string        `json:"embed,omitempty" bson:"embed,omitempty"`
 	Pics    []string      `bson:"pics,omitempty" json:"pics,omitempty"`
 	Date    int64         `bson:"date" json:"date"`
 }
