@@ -53,7 +53,7 @@ func mktorrent(tpid string) (string, error) {
 }
 func capCover(id string, sec string) (string, error) {
 	id = globalConf.ResDir + "/video/" + id
-	cmd := strings.Fields("ffmpeg -ss " + sec + " -i " + id + " -vframes 1 -r 1 -f image2 -y " + id + ".jpg")
+	cmd := strings.Fields("ffmpeg -ss " + sec + " -i " + id + " -vframes 1 -r 1 -vf scale=320:-1,crop=320:180 -f image2 -y " + id + ".jpg")
 	prc := exec.Command(cmd[0], cmd[1:]...)
 	err := prc.Run()
 	if err != nil {

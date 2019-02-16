@@ -64,45 +64,48 @@ type loginDBModel struct {
 	Passwd         string `json:"-" bson:"passwd"`
 	ActiveCode     string `json:"-" bson:"activeCode"`
 }
-type vcScalfold struct {
-	Title    string   `bson:"title" json:"title" binding:"required"`
-	Price    *int     `bson:"price" json:"price" binding:"exists"`
-	Desc     string   `bson:"desc" json:"desc"`
-	Tags     []string `bson:"tags" json:"tags" binding:"required"`
-	Cover    string   `bson:"cover" json:"cover"`
-	Date     int64    `bson:"date" json:"date"`
-	View     int64    `bson:"view" json:"view"`
-	Comments int64    `bson:"comments_length,omitempty" json:"comments,omitempty"`
-}
-type myVCModel struct {
-	vcScalfold `bson:",inline"`
-	ID         bson.ObjectId `bson:"_id" json:"id" binding:"required"`
-}
-type basicVCModel struct {
-	vcScalfold   `bson:",inline"`
-	ID           bson.ObjectId  `bson:"_id" json:"id"`
-	Owner        bson.ObjectId  `bson:"owner" json:"-"`
-	OwnerDoc     basicUserModel `bson:"owner_doc,omitempty" json:"owner"`
-	outLikeModel `bson:",inline"`
-}
+
 type basicVideoModel struct {
-	Title string `bson:"title" json:"title"`
-	Desc  string `bson:"desc" json:"desc"`
-	Date  int64  `bson:"date" json:"date"`
-	ID    string `bson:"_id" json:"id"`
-	Cover string `bson:"cover" json:"cover"`
+	Title    string        `bson:"title" json:"title" binding:"required"`
+	Date     int64         `bson:"date" json:"date"`
+	ID       bson.ObjectId `bson:"_id" json:"id"`
+	Cover    string        `bson:"cover" json:"cover"`
+	View     int64         `bson:"view" json:"view"`
+	Comments int64         `bson:"comments_length,omitempty" json:"comments,omitempty"`
+}
+type faceVideoModel struct {
+	basicVideoModel `bson:",inline"`
+	Owner           bson.ObjectId  `bson:"owner" json:"-"`
+	OwnerDoc        basicUserModel `bson:"owner_doc,omitempty" json:"owner"`
+	outLikeModel    `bson:",inline"`
+}
+type newVideoModel struct {
+	faceVideoModel `bson:",inline"`
+	Desc           string `bson:"desc,omitempty" json:"desc,omitempty"`
+	Path           string `bson:"path" json:"path"`
+	Hash           string `bson:"-" json:"vid,omitempty" binding:"required"`
+	Tag            int8   `bson:"tag" json:"tag" binding:"required"`
+}
+type updateVideoModel struct {
+	ID    bson.ObjectId `bson:"_id" json:"id" binding:"required"`
+	Tag   int8          `bson:"tag" json:"tag" binding:"required"`
+	Desc  string        `bson:"desc,omitempty" json:"desc,omitempty"`
+	Title string        `bson:"title" json:"title" binding:"required"`
+}
+type detailVideoModel struct {
+	faceVideoModel `bson:",inline"`
+	Desc           string            `bson:"desc,omitempty" json:"desc,omitempty"`
+	Path           string            `bson:"path" json:"path"`
+	Tag            int8              `bson:"tag" json:"tag" binding:"required"`
+	Recommend      []basicVideoModel `json:"recommend"`
+}
+type delVideoModel struct {
 	Path  string `bson:"path" json:"path"`
+	Cover string `bson:"cover" json:"cover"`
 }
 type uploadFileModel struct {
 	Blob *multipart.FileHeader `json:"blob" binding:"required"`
 	ID   string                `json:"vid" form:"vid" binding:"required"`
-}
-
-type addVideoModel struct {
-	Vid   string        `json:"vid" binding:"required"`
-	Cid   bson.ObjectId `json:"cid" binding:"required"`
-	Title string        `json:"title" binding:"required"`
-	Desc  string        `json:"desc"`
 }
 
 type changeCoverModel struct {
@@ -110,10 +113,6 @@ type changeCoverModel struct {
 	Path string        `json:"path" form:"path"`
 }
 
-type outVideoModel struct {
-	basicVCModel `bson:",inline"`
-	Videos       []basicVideoModel `bson:"videos" json:"videos"`
-}
 type getVModel struct {
 	Size  int  `form:"size" binding:"required"`
 	Start *int `form:"fi" binding:"exists"`
