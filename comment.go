@@ -20,6 +20,8 @@ func setLike(c *gin.Context) {
 		dbtype = "video"
 	case "2":
 		dbtype = "community"
+	case "3":
+		dbtype = "gallery"
 	case "reply":
 		dbtype = "comment"
 	default:
@@ -52,6 +54,8 @@ func getComments(c *gin.Context) {
 		dbtype = "video"
 	case "2":
 		dbtype = "community"
+	case "3":
+		dbtype = "gallery"
 	case "reply":
 		dbtype = "comment"
 	default:
@@ -98,6 +102,8 @@ func addComment(c *gin.Context) {
 		dbtype = "video"
 	case "2":
 		dbtype = "community"
+	case "3":
+		dbtype = "gallery"
 	case "reply":
 		dbtype = "comment"
 	default:

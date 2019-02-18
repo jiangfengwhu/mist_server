@@ -121,11 +121,7 @@ type userPicModel struct {
 	// Blob *multipart.FileHeader `form:"pic" binding:"required"`
 	Type string `form:"type" binding:"required"`
 }
-type delVideoQ struct {
-	Cid   string `form:"cid" binding:"required"`
-	Vid   string `form:"vid" binding:"required"`
-	Cover string `form:"cov" binding:"required"`
-}
+
 type circleModel struct {
 	ID      bson.ObjectId `bson:"_id" json:"id"`
 	Content string        `json:"cont,omitempty" bson:"cont,omitempty"`
@@ -139,6 +135,19 @@ type outCircleModel struct {
 	OwnerDoc     basicUserModel `bson:"owner_doc,omitempty" json:"owner"`
 	outLikeModel `bson:",inline"`
 	Comments     int64 `bson:"comments_length,omitempty" json:"comments,omitempty"`
+}
+type newGalleryModel struct {
+	Pics     []string       `bson:"pics" json:"pics"`
+	Content  string         `json:"cont,omitempty" bson:"cont,omitempty"`
+	ID       bson.ObjectId  `bson:"_id" json:"id"`
+	Date     int64          `bson:"date" json:"date"`
+	Owner    bson.ObjectId  `bson:"owner" json:"-"`
+	OwnerDoc basicUserModel `bson:"owner_doc,omitempty" json:"owner"`
+}
+type outGalleryModel struct {
+	newGalleryModel `bson:",inline"`
+	outLikeModel    `bson:",inline"`
+	Comments        int64 `bson:"comments_length,omitempty" json:"comments,omitempty"`
 }
 type commentModel struct {
 	Owner        bson.ObjectId `bson:"owner" json:"owner"`

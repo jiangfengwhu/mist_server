@@ -8,7 +8,7 @@ import (
 )
 
 func uploadImage(c *gin.Context) {
-	uploadDir := globalConf.ResDir + "/community/"
+	uploadDir := globalConf.ResDir + "/pics/"
 	form, err := c.MultipartForm()
 	if err != nil {
 		c.JSON(200, gin.H{"status": false, "msg": err.Error()})
@@ -21,7 +21,7 @@ func uploadImage(c *gin.Context) {
 			return
 		}
 	}
-	c.JSON(200, gin.H{"status": true, "path": globalConf.ResRef + "/community/"})
+	c.JSON(200, gin.H{"status": true, "path": globalConf.ResRef + "/pics/"})
 	return
 }
 func addCircle(c *gin.Context) {
