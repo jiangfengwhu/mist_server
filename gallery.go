@@ -33,10 +33,9 @@ func latesetGallery(c *gin.Context) {
 		c.JSON(200, gin.H{"status": false, "msg": err.Error()})
 		return
 	}
-	var re []outGalleryModel
+	var re []faceGalleryModel
 	log.Println(*params.Start*params.Size, *params.Start*(params.Size+1))
-	commentslength := bson.M{"$addFields": bson.M{"comments_length": bson.M{"$size": bson.M{"$ifNull": []interface{}{"$comments", []string{}}}}, "likes_length": bson.M{"$size": bson.M{"$ifNull": []interface{}{"$likes", []string{}}}}, "isLiked": bson.M{"$in": []interface{}{c.MustGet("auth").(string), bson.M{"$ifNull": []interface{}{"$likes", []string{}}}}}}}
-	err := latestC("gallery", []bson.M{commentslength}, *params.Start*params.Size, params.Size*(*params.Start+1), &re)
+	err := pipiC("gallery", []bson.M{{"$sort": bson.M{"_id": -1}}, bson.M{"$limit": params.Size * (*params.Start + 1)}, bson.M{"$skip": *params.Start * params.Size}}, &re, true)
 	if err != nil {
 		c.JSON(200, false)
 		return
@@ -58,6 +57,27 @@ func galleryAll(c *gin.Context) {
 	}
 	c.JSON(200, re)
 	return
+}
+func getGallery(c *gin.Context) {
+	id := c.Param("id")
+	if len(id) != 24 {
+		c.JSON(200, "wrong id")
+		return
+	}
+	var re outGalleryModel
+	likeslength := bson.M{"$addFields": bson.M{"comments_length": bson.M{"$size": bson.M{"$ifNull": []interface{}{"$comments", []string{}}}}, "likes_length": bson.M{"$size": bson.M{"$ifNull": []interface{}{"$likes", []string{}}}}, "isLiked": bson.M{"$in": []interface{}{c.MustGet("auth").(string), bson.M{"$ifNull": []interface{}{"$likes", []string{}}}}}}}
+	line := []bson.M{
+		{"$match": bson.M{"_id": bson.ObjectIdHex(id)}},
+		lookowner,
+		unwind,
+		likeslength,
+	}
+	err := pipiC("gallery", line, &re, false)
+	if err != nil {
+		c.JSON(200, false)
+		return
+	}
+	c.JSON(200, re)
 }
 func delGallery(c *gin.Context) {
 	id := c.Param("id")

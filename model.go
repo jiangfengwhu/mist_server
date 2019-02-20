@@ -144,6 +144,11 @@ type newGalleryModel struct {
 	Owner    bson.ObjectId  `bson:"owner" json:"-"`
 	OwnerDoc basicUserModel `bson:"owner_doc,omitempty" json:"owner"`
 }
+type faceGalleryModel struct {
+	Pics    []string      `bson:"pics" json:"pics"`
+	Content string        `json:"cont,omitempty" bson:"cont,omitempty"`
+	ID      bson.ObjectId `bson:"_id" json:"id"`
+}
 type outGalleryModel struct {
 	newGalleryModel `bson:",inline"`
 	outLikeModel    `bson:",inline"`
