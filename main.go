@@ -44,7 +44,7 @@ func main() {
 	api.POST("addGallery", Auth(), addGallery)
 	api.GET("getGallery", CheckGuest(), latesetGallery)
 	api.GET("oneGallery/:id", CheckGuest(), getGallery)
-	api.GET("commall/:id", commAll)
+	api.GET("commall/:id", CheckGuest(), commAll)
 	api.GET("galleryall/:id", galleryAll)
 	api.DELETE("delcomms/:id", Auth(), delcomms)
 	api.DELETE("delgallery/:id", Auth(), delGallery)

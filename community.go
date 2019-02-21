@@ -27,12 +27,12 @@ func uploadImage(c *gin.Context) {
 func addCircle(c *gin.Context) {
 	var collection outCircleModel
 	c.ShouldBind(&collection)
-	if len(collection.Pics) == 0 && len(collection.Content) == 0 && len(collection.Embed) == 0 {
+	if len(collection.Pics) == 0 && len(collection.Content) == 0 {
 		c.JSON(200, gin.H{"status": false, "msg": "信息不完整"})
 		return
 	}
-	if len(collection.Pics) > 0 && len(collection.Embed) > 0 {
-		c.JSON(200, gin.H{"status": false, "msg": "视频和图片不能同时存在"})
+	if len(collection.Pics) > 4 {
+		c.JSON(200, gin.H{"status": false, "msg": "图片数过多"})
 		return
 	}
 	collection.ID = bson.NewObjectId()
@@ -71,8 +71,14 @@ func commAll(c *gin.Context) {
 		c.JSON(200, "wrong id")
 		return
 	}
-	var re []circleModel
-	err := findC("community", bson.M{"owner": bson.ObjectIdHex(id)}, true, &re)
+	var re []ownCircleModel
+	likeslength := bson.M{"$addFields": bson.M{"comments_length": bson.M{"$size": bson.M{"$ifNull": []interface{}{"$comments", []string{}}}}, "likes_length": bson.M{"$size": bson.M{"$ifNull": []interface{}{"$likes", []string{}}}}, "isLiked": bson.M{"$in": []interface{}{c.MustGet("auth").(string), bson.M{"$ifNull": []interface{}{"$likes", []string{}}}}}}}
+	line := []bson.M{
+		{"$match": bson.M{"owner": bson.ObjectIdHex(id)}},
+		bson.M{"$sort": bson.M{"_id": -1}},
+		likeslength,
+	}
+	err := pipiC("community", line, &re, true)
 	if err != nil {
 		c.JSON(200, false)
 		return

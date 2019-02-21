@@ -132,7 +132,12 @@ type circleModel struct {
 type outCircleModel struct {
 	circleModel  `bson:",inline"`
 	Owner        bson.ObjectId  `bson:"owner" json:"-"`
-	OwnerDoc     basicUserModel `bson:"owner_doc,omitempty" json:"owner"`
+	OwnerDoc     basicUserModel `bson:"owner_doc,omitempty" json:"owner,omitempty"`
+	outLikeModel `bson:",inline"`
+	Comments     int64 `bson:"comments_length,omitempty" json:"comments,omitempty"`
+}
+type ownCircleModel struct {
+	circleModel  `bson:",inline"`
 	outLikeModel `bson:",inline"`
 	Comments     int64 `bson:"comments_length,omitempty" json:"comments,omitempty"`
 }
