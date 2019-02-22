@@ -128,6 +128,7 @@ type circleModel struct {
 	Embed   string        `json:"embed,omitempty" bson:"embed,omitempty"`
 	Pics    []string      `bson:"pics,omitempty" json:"pics,omitempty"`
 	Date    int64         `bson:"date" json:"date"`
+	Cover   string        `bson:"cover,omitempty" json:"cover,omitempty"`
 }
 type outCircleModel struct {
 	circleModel  `bson:",inline"`

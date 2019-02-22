@@ -27,8 +27,12 @@ func uploadImage(c *gin.Context) {
 func addCircle(c *gin.Context) {
 	var collection outCircleModel
 	c.ShouldBind(&collection)
-	if len(collection.Pics) == 0 && len(collection.Content) == 0 {
+	if len(collection.Pics) == 0 && len(collection.Content) == 0 && len(collection.Embed) == 0 {
 		c.JSON(200, gin.H{"status": false, "msg": "信息不完整"})
+		return
+	}
+	if len(collection.Pics) > 0 && len(collection.Embed) > 0 {
+		c.JSON(200, gin.H{"status": false, "msg": "视频和图片不能同时存在"})
 		return
 	}
 	if len(collection.Pics) > 4 {
@@ -38,6 +42,22 @@ func addCircle(c *gin.Context) {
 	collection.ID = bson.NewObjectId()
 	collection.Date = time.Now().Unix()
 	collection.Owner = bson.ObjectIdHex(c.MustGet("auth").(string))
+	if collection.Embed != "" {
+		tp, err := mktorrent(collection.Embed)
+		if err != nil {
+			log.Println(err.Error())
+			c.JSON(200, gin.H{"status": false, "msg": err.Error()})
+			return
+		}
+		path, err := capCover(collection.Embed, "0", true)
+		if err != nil {
+			log.Println(err)
+			c.JSON(200, gin.H{"status": false, "msg": err.Error()})
+			return
+		}
+		collection.Embed = tp
+		collection.Cover = path
+	}
 	err := insertC("community", collection)
 	if err != nil {
 		log.Println(err.Error())
