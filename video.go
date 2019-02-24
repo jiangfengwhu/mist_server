@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
@@ -112,7 +113,7 @@ func addVideo(c *gin.Context) {
 		c.JSON(200, gin.H{"status": false, "msg": err.Error()})
 		return
 	}
-	path, err := capCover(video.Hash, "3", false)
+	path, err := capCover(video.Hash, fmt.Sprint(video.CoverPos), false)
 	if err != nil {
 		log.Println(err)
 		c.JSON(200, gin.H{"status": false, "msg": err.Error()})

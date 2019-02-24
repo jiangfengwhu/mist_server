@@ -85,6 +85,7 @@ type newVideoModel struct {
 	Path           string `bson:"path" json:"path"`
 	Hash           string `bson:"-" json:"vid,omitempty" binding:"required"`
 	Tag            int8   `bson:"tag" json:"tag" binding:"required"`
+	CoverPos       uint16 `bson:"-" json:"coverPos" binding:"required"`
 }
 type updateVideoModel struct {
 	ID    bson.ObjectId `bson:"_id" json:"id" binding:"required"`
