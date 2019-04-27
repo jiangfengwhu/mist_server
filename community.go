@@ -1,10 +1,11 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
-	"github.com/globalsign/mgo/bson"
 	"log"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/globalsign/mgo/bson"
 )
 
 func uploadImage(c *gin.Context) {
@@ -69,7 +70,7 @@ func addCircle(c *gin.Context) {
 }
 
 func latestCircle(c *gin.Context) {
-	var params getVModel
+	var params getOModel
 	if err := c.ShouldBind(&params); err != nil {
 		c.JSON(200, gin.H{"status": false, "msg": err.Error()})
 		return

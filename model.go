@@ -120,6 +120,10 @@ type getVModel struct {
 	Size  int  `form:"size" binding:"required"`
 	Start *int `form:"fi" binding:"exists"`
 }
+type getOModel struct {
+	Size  int  `form:"size" binding:"required"`
+	Start *int `form:"fi" binding:"exists"`
+}
 type userPicModel struct {
 	// Blob *multipart.FileHeader `form:"pic" binding:"required"`
 	Type string `form:"type" binding:"required"`
