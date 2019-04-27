@@ -172,7 +172,7 @@ func latestVideo(c *gin.Context) {
 	commentslength := bson.M{"$addFields": bson.M{"comments_length": bson.M{"$size": bson.M{"$ifNull": []interface{}{"$comments", []string{}}}}, "likes_length": bson.M{"$size": bson.M{"$ifNull": []interface{}{"$likes", []string{}}}}}}
 	var err error
 	if params.Tag == -1 {
-		for i := 0; i < 11; i++ {
+		for i := 0; i < 12; i++ {
 			tagmatch := bson.M{"$match": bson.M{"tag": i + 1}}
 			err = latestC("video", []bson.M{tagmatch, commentslength}, *params.Start*params.Size, params.Size*(*params.Start+1), &re[i])
 			re = append(re, []faceVideoModel{})
