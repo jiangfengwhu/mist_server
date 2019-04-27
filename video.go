@@ -2,15 +2,16 @@ package main
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/globalsign/mgo"
-	"github.com/globalsign/mgo/bson"
 	"io"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/globalsign/mgo"
+	"github.com/globalsign/mgo/bson"
 )
 
 func checkBP(c *gin.Context) {
@@ -166,15 +167,25 @@ func latestVideo(c *gin.Context) {
 		return
 	}
 	// empty := []string{}
-	var re []faceVideoModel
+	re := make([][]faceVideoModel, 1, 11)
 	log.Println(*params.Start*params.Size, *params.Start*(params.Size+1))
-	// notempty := bson.M{"$match": bson.M{"videos": bson.M{"$exists": true, "$ne": empty}}}
 	commentslength := bson.M{"$addFields": bson.M{"comments_length": bson.M{"$size": bson.M{"$ifNull": []interface{}{"$comments", []string{}}}}, "likes_length": bson.M{"$size": bson.M{"$ifNull": []interface{}{"$likes", []string{}}}}}}
-	err := latestC("video", []bson.M{commentslength}, *params.Start*params.Size, params.Size*(*params.Start+1), &re)
+	var err error
+	if params.Tag == -1 {
+		for i := 0; i < 11; i++ {
+			tagmatch := bson.M{"$match": bson.M{"tag": i + 1}}
+			err = latestC("video", []bson.M{tagmatch, commentslength}, *params.Start*params.Size, params.Size*(*params.Start+1), &re[i])
+			re = append(re, []faceVideoModel{})
+		}
+	} else {
+		tagmatch := bson.M{"$match": bson.M{"tag": params.Tag}}
+		err = latestC("video", []bson.M{tagmatch, commentslength}, *params.Start*params.Size, params.Size*(*params.Start+1), &re[0])
+	}
 	if err != nil {
 		c.JSON(200, false)
 		return
 	}
+	// notempty := bson.M{"$match": bson.M{"videos": bson.M{"$exists": true, "$ne": empty}}}
 	c.JSON(200, re)
 	return
 }

@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/globalsign/mgo/bson"
 	"mime/multipart"
+
+	"github.com/globalsign/mgo/bson"
 )
 
 type registModel struct {
@@ -105,7 +106,7 @@ type delVideoModel struct {
 	Cover string `bson:"cover" json:"cover"`
 }
 type uploadFileModel struct {
-	Blob *multipart.FileHeader `json:"blob" binding:"required"`
+	Blob *multipart.FileHeader `json:"blob" form:"blob" binding:"required"`
 	ID   string                `json:"vid" form:"vid" binding:"required"`
 }
 
@@ -115,6 +116,7 @@ type changeCoverModel struct {
 }
 
 type getVModel struct {
+	Tag   int8 `form:"tag" binding:"required"`
 	Size  int  `form:"size" binding:"required"`
 	Start *int `form:"fi" binding:"exists"`
 }
