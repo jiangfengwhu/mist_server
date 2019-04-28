@@ -159,7 +159,24 @@ func changeCover(c *gin.Context) {
 	c.JSON(200, gin.H{"status": true, "msg": "设置封面成功"})
 	return
 }
-
+func searchVideo(c *gin.Context) {
+	var par searchModel
+	if err := c.ShouldBind(&par); err != nil {
+		c.JSON(200, false)
+		return
+	}
+	var re []faceVideoModel
+	commentslength := bson.M{"$addFields": bson.M{"comments_length": bson.M{"$size": bson.M{"$ifNull": []interface{}{"$comments", []string{}}}}, "likes_length": bson.M{"$size": bson.M{"$ifNull": []interface{}{"$likes", []string{}}}}}}
+	tagmatch := bson.M{"$match": bson.M{"$or": []bson.M{bson.M{"title": bson.M{"$regex" : bson.RegEx{Pattern: par.Key, Options: "i"}}}, bson.M{"desc": bson.M{"$regex" : bson.RegEx{Pattern: par.Key, Options: "i"}}}}}}
+	err := latestC("video", []bson.M{tagmatch, commentslength}, *par.Start*par.Size, par.Size*(*par.Start+1), &re)
+	if err != nil {
+		c.JSON(200, false)
+		return
+	}
+	// notempty := bson.M{"$match": bson.M{"videos": bson.M{"$exists": true, "$ne": empty}}}
+	c.JSON(200, re)
+	return
+}
 func latestVideo(c *gin.Context) {
 	var params getVModel
 	if err := c.ShouldBind(&params); err != nil {
@@ -210,11 +227,26 @@ func getVideo(c *gin.Context) {
 		var recom []basicVideoModel
 		tagLine := bson.M{"$match": bson.M{"tag": re.Tag}}
 		err = latestC("video", []bson.M{tagLine}, 0, 12, &recom)
-		re.Recommend = recom
 		if err != nil {
 			c.JSON(200, false)
 			return
 		}
+		if len(re.PlayList) != 0 {
+			if err := findC("playlist", bson.M{"_id": re.PlayList}, false, &re.ListDoc); err != nil {
+				c.JSON(200, false)
+				return
+			}
+			var plist []basicVideoModel
+			listLine := bson.M{"playlist": re.PlayList}
+			err := findC("video", listLine, true, &plist)
+			if err != nil {
+				log.Println(err.Error())
+				c.JSON(200, false)
+				return
+			}
+			re.ListVideos = plist
+		}
+		re.Recommend = recom
 		c.JSON(200, re)
 		col.Update(bson.M{"_id": bson.ObjectIdHex(c.Param("id"))}, bson.M{"$inc": bson.M{"view": 1}})
 	})
@@ -225,8 +257,12 @@ func videoAll(c *gin.Context) {
 		c.JSON(200, "wrong id")
 		return
 	}
-	var re []basicVideoModel
-	err := findC("video", bson.M{"owner": bson.ObjectIdHex(id)}, true, &re)
+	var re []userVideoModel
+	err := pipiC("video", []bson.M{
+		{"$match": bson.M{"owner": bson.ObjectIdHex(id)}},
+		looklist,
+		unwindlist,
+	}, &re, true)
 	if err != nil {
 		c.JSON(200, false)
 		return

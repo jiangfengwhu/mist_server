@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
 	"log"
+
+	"github.com/gin-gonic/gin"
 )
 
 func init() {
@@ -54,5 +55,10 @@ func main() {
 	api.GET("chat/:id", CheckGuest(), func(c *gin.Context) {
 		serveWs(hub, c)
 	})
+	api.GET("listAll/:id", listAll)
+	api.POST("newlist", Auth(), newList)
+	api.PUT("addtolist", Auth(), addtoList)
+	api.PUT("refromlist", Auth(), removeFromList)
+	api.GET("searchVideo", searchVideo)
 	r.Run(":3030")
 }

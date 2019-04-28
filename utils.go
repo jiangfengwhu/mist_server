@@ -3,16 +3,19 @@ package main
 import (
 	"crypto/md5"
 	"fmt"
-	"github.com/globalsign/mgo/bson"
 	"io"
 	"log"
 	"os"
 	"os/exec"
 	"strings"
+
+	"github.com/globalsign/mgo/bson"
 )
 
 var lookowner = bson.M{"$lookup": bson.M{"from": "user", "localField": "owner", "foreignField": "_id", "as": "owner_doc"}}
 var unwind = bson.M{"$unwind": "$owner_doc"}
+var looklist = bson.M{"$lookup": bson.M{"from": "playlist", "localField": "playlist", "foreignField": "_id", "as": "listdoc"}}
+var unwindlist = bson.M{"$unwind": bson.M{"path": "$listdoc", "preserveNullAndEmptyArrays": true}}
 var lookcomments = bson.M{"$lookup": bson.M{"from": "comment", "localField": "comments", "foreignField": "_id", "as": "comments_doc"}}
 var lookcomowner = bson.M{"$lookup": bson.M{"from": "user", "localField": "comments_doc.owner", "foreignField": "_id", "as": "owners_doc"}}
 
@@ -53,7 +56,7 @@ func mktorrent(tpid string) (string, error) {
 }
 func capCover(id string, sec string, origin bool) (string, error) {
 	id = globalConf.ResDir + "/video/" + id
-	cmdstr := "ffmpeg -ss " + sec + " -i " + id + " -vframes 1 -r 1 -vf scale=320:-1,crop=320:180 -f image2 -y " + id + ".jpg"
+	cmdstr := "ffmpeg -ss " + sec + " -i " + id + " -vframes 1 -r 1 -vf scale=320:180:force_original_aspect_ratio=increase,crop=320:180 -f image2 -y " + id + ".jpg"
 	if origin {
 		cmdstr = "ffmpeg -ss " + sec + " -i " + id + " -vframes 1 -r 1 -f image2 -y " + id + ".jpg"
 	}

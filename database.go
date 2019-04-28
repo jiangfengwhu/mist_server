@@ -1,9 +1,10 @@
 package main
 
 import (
+	"log"
+
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
-	"log"
 )
 
 var initSession *mgo.Session
@@ -21,6 +22,11 @@ func updateC(col string, selector interface{}, update interface{}) error {
 	s := initSession.Copy()
 	defer s.Close()
 	return s.DB("mist").C(col).Update(selector, update)
+}
+func updateAllC(col string, selector interface{}, update interface{}) (*mgo.ChangeInfo, error) {
+	s := initSession.Copy()
+	defer s.Close()
+	return s.DB("mist").C(col).UpdateAll(selector, update)
 }
 func insertC(col string, docs interface{}) error {
 	s := initSession.Copy()

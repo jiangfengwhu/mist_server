@@ -73,6 +73,11 @@ type basicVideoModel struct {
 	Cover    string        `bson:"cover" json:"cover"`
 	View     int64         `bson:"view" json:"view"`
 	Comments int64         `bson:"comments_length,omitempty" json:"comments,omitempty"`
+	PlayList bson.ObjectId `bson:"playlist,omitempty" json:"playlist,omitempty"`
+}
+type userVideoModel struct {
+	basicVideoModel `bson:",inline"`
+	ListDoc         *outListModel `json:"listdoc,omitempty" bson:"listdoc,omitempty"`
 }
 type faceVideoModel struct {
 	basicVideoModel `bson:",inline"`
@@ -100,6 +105,8 @@ type detailVideoModel struct {
 	Path           string            `bson:"path" json:"path"`
 	Tag            int8              `bson:"tag" json:"tag" binding:"required"`
 	Recommend      []basicVideoModel `json:"recommend"`
+	ListVideos     []basicVideoModel `json:"plists,omitempty"`
+	ListDoc        *outListModel     `json:"listdoc,omitempty" bson:"listdoc,omitempty"`
 }
 type delVideoModel struct {
 	Path  string `bson:"path" json:"path"`
@@ -121,8 +128,9 @@ type getVModel struct {
 	Start *int `form:"fi" binding:"exists"`
 }
 type getOModel struct {
-	Size  int  `form:"size" binding:"required"`
-	Start *int `form:"fi" binding:"exists"`
+	Key   string `form:"key"`
+	Size  int    `form:"size" binding:"required"`
+	Start *int   `form:"fi" binding:"exists"`
 }
 type userPicModel struct {
 	// Blob *multipart.FileHeader `form:"pic" binding:"required"`
@@ -199,3 +207,9 @@ type likeModel struct {
 	Type string `form:"type" binding:"required"`
 	Inc  *int8  `form:"inc" binding:"exists"`
 }
+type searchModel struct {
+	Key   string `form:"key" binding:"required"`
+	Size  int    `form:"size" binding:"required"`
+	Start *int   `form:"fi" binding:"exists"`
+}
+
