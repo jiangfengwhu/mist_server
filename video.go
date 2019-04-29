@@ -167,7 +167,7 @@ func searchVideo(c *gin.Context) {
 	}
 	var re []faceVideoModel
 	commentslength := bson.M{"$addFields": bson.M{"comments_length": bson.M{"$size": bson.M{"$ifNull": []interface{}{"$comments", []string{}}}}, "likes_length": bson.M{"$size": bson.M{"$ifNull": []interface{}{"$likes", []string{}}}}}}
-	tagmatch := bson.M{"$match": bson.M{"$or": []bson.M{bson.M{"title": bson.M{"$regex" : bson.RegEx{Pattern: par.Key, Options: "i"}}}, bson.M{"desc": bson.M{"$regex" : bson.RegEx{Pattern: par.Key, Options: "i"}}}}}}
+	tagmatch := bson.M{"$match": bson.M{"$or": []bson.M{bson.M{"title": bson.M{"$regex": bson.RegEx{Pattern: par.Key, Options: "i"}}}, bson.M{"desc": bson.M{"$regex": bson.RegEx{Pattern: par.Key, Options: "i"}}}}}}
 	err := latestC("video", []bson.M{tagmatch, commentslength}, *par.Start*par.Size, par.Size*(*par.Start+1), &re)
 	if err != nil {
 		c.JSON(200, false)
@@ -187,18 +187,20 @@ func latestVideo(c *gin.Context) {
 	re := make([][]faceVideoModel, 1, 12)
 	log.Println(*params.Start*params.Size, *params.Start*(params.Size+1))
 	commentslength := bson.M{"$addFields": bson.M{"comments_length": bson.M{"$size": bson.M{"$ifNull": []interface{}{"$comments", []string{}}}}, "likes_length": bson.M{"$size": bson.M{"$ifNull": []interface{}{"$likes", []string{}}}}}}
+	removeListDump := bson.M{"$group": bson.M{"_id": bson.M{"$ifNull": []string{"$playlist", "$_id"}}, "doc": bson.M{"$last": "$$ROOT"}}}
+	replaceroot := bson.M{"$replaceRoot": bson.M{"newRoot": "$doc"}}
 	var err error
 	if params.Tag == -1 {
 		for i := 0; i < 12; i++ {
 			tagmatch := bson.M{"$match": bson.M{"tag": i + 1}}
-			err = latestC("video", []bson.M{tagmatch, commentslength}, *params.Start*params.Size, params.Size*(*params.Start+1), &re[i])
+			err = latestC("video", []bson.M{removeListDump, replaceroot, tagmatch, commentslength}, *params.Start*params.Size, params.Size*(*params.Start+1), &re[i])
 			if i != 11 {
 				re = append(re, []faceVideoModel{})
 			}
 		}
 	} else {
 		tagmatch := bson.M{"$match": bson.M{"tag": params.Tag}}
-		err = latestC("video", []bson.M{tagmatch, commentslength}, *params.Start*params.Size, params.Size*(*params.Start+1), &re[0])
+		err = latestC("video", []bson.M{removeListDump, replaceroot, tagmatch, commentslength}, *params.Start*params.Size, params.Size*(*params.Start+1), &re[0])
 	}
 	if err != nil {
 		c.JSON(200, false)
@@ -226,12 +228,8 @@ func getVideo(c *gin.Context) {
 		}).One(&re)
 		var recom []basicVideoModel
 		tagLine := bson.M{"$match": bson.M{"tag": re.Tag}}
-		err = latestC("video", []bson.M{tagLine}, 0, 12, &recom)
-		if err != nil {
-			c.JSON(200, false)
-			return
-		}
 		if len(re.PlayList) != 0 {
+			tagLine = bson.M{"$match": bson.M{"tag": re.Tag, "playlist": bson.M{"$ne": re.PlayList}}}
 			if err := findC("playlist", bson.M{"_id": re.PlayList}, false, &re.ListDoc); err != nil {
 				c.JSON(200, false)
 				return
@@ -245,6 +243,11 @@ func getVideo(c *gin.Context) {
 				return
 			}
 			re.ListVideos = plist
+		}
+		err = latestC("video", []bson.M{tagLine}, 0, 12, &recom)
+		if err != nil {
+			c.JSON(200, false)
+			return
 		}
 		re.Recommend = recom
 		c.JSON(200, re)
