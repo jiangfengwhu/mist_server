@@ -2,7 +2,6 @@ package main
 
 import (
 	"log"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/globalsign/mgo/bson"
@@ -10,22 +9,27 @@ import (
 
 type basicListModel struct {
 	outListModel `bson:",inline"`
-	ID           bson.ObjectId  `bson:"_id" json:"id"`
-	Cover        string         `bson:"cover" json:"cover"`
-	Owner        bson.ObjectId  `bson:"owner" json:"-"`
+	Owner        bson.ObjectId   `bson:"owner" json:"-"`
 	OwnerDoc     *basicUserModel `bson:"owner_doc,omitempty" json:"owner,omitempty"`
 }
 type outListModel struct {
-	Title string `bson:"title" json:"title,omitempty" binding:"required"`
-	Date  int64  `bson:"date" json:"date,omitempty"`
+	Title string        `bson:"title" json:"title" binding:"required"`
+	Desc  string        `bson:"desc,omitempty" json:"desc,omitempty"`
+	ID    bson.ObjectId `bson:"_id" json:"id"`
 }
 type updateListModel struct {
 	ID     bson.ObjectId   `bson:"_id" json:"id" binding:"required"`
+	Title string        `bson:"title" json:"title" binding:"required"`
+	Desc  string        `bson:"desc,omitempty" json:"desc,omitempty"`
+}
+type addToListModel struct {
+	ID     bson.ObjectId   `bson:"_id" json:"id" binding:"required"`
 	Videos []bson.ObjectId `bson:"videos" json:"videos" binding:"required"`
 }
-type removeListModel struct {
+type removeFromListModel struct {
 	Videos []bson.ObjectId `bson:"videos" json:"videos" binding:"required"`
 }
+
 func newList(c *gin.Context) {
 	var list basicListModel
 	if err := c.ShouldBind(&list); err != nil {
@@ -34,7 +38,6 @@ func newList(c *gin.Context) {
 		return
 	}
 	log.Println(list)
-	list.Date = time.Now().Unix()
 	list.ID = bson.NewObjectId()
 	list.Owner = bson.ObjectIdHex(c.MustGet("auth").(string))
 	if err := insertC("playlist", list); err != nil {
@@ -62,7 +65,7 @@ func listAll(c *gin.Context) {
 }
 
 func addtoList(c *gin.Context) {
-	var update updateListModel
+	var update addToListModel
 	if err := c.ShouldBind(&update); err != nil {
 		log.Println(err.Error())
 		c.JSON(200, gin.H{"status": false, "msg": err.Error()})
@@ -79,7 +82,7 @@ func addtoList(c *gin.Context) {
 }
 
 func removeFromList(c *gin.Context) {
-	var update removeListModel
+	var update removeFromListModel
 	if err := c.ShouldBind(&update); err != nil {
 		log.Println(err.Error())
 		c.JSON(200, gin.H{"status": false, "msg": err.Error()})
@@ -92,5 +95,40 @@ func removeFromList(c *gin.Context) {
 		return
 	}
 	c.JSON(200, gin.H{"status": true, "msg": "从列表移除成功"})
+	return
+}
+func removeList(c *gin.Context) {
+	id := c.Param("id")
+	if len(id) != 24 {
+		log.Println(id)
+		c.JSON(200, gin.H{"status": false, "msg": "not correct id"})
+		return
+	}
+	if err := delC("playlist", bson.M{"_id": bson.ObjectIdHex(id), "owner": bson.ObjectIdHex(c.MustGet("auth").(string))});err!=nil {
+		c.JSON(200, gin.H{"status":false, "msg":"删除失败"})
+		return
+	}
+	info, err := updateAllC("video", bson.M{"playlist": bson.ObjectIdHex(id)}, bson.M{"$unset": bson.M{"playlist": ""}})
+	log.Println(info)
+	if err != nil {
+		c.JSON(200, gin.H{"status": false, "msg": err.Error()})
+		return
+	}
+	c.JSON(200, gin.H{"status": true, "msg": "删除播放列表成功"})
+	return
+}
+func updateList(c *gin.Context) {
+	var list updateListModel
+	if err := c.ShouldBind(&list); err != nil {
+		log.Println(err)
+		c.JSON(200, gin.H{"status": false, "msg": "信息不完整"})
+		return
+	}
+	err := updateC("playlist", bson.M{"_id": list.ID, "owner": bson.ObjectIdHex(c.MustGet("auth").(string))}, bson.M{"$set": bson.M{"desc": list.Desc, "title": list.Title}})
+	if err != nil {
+		c.JSON(200, gin.H{"status": false, "msg": err.Error()})
+		return
+	}
+	c.JSON(200, gin.H{"status": true, "msg": "更新播放列表信息成功", "list": gin.H{"id": list.ID, "desc": list.Desc, "title": list.Title}})
 	return
 }

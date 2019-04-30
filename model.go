@@ -73,11 +73,11 @@ type basicVideoModel struct {
 	Cover    string        `bson:"cover" json:"cover"`
 	View     int64         `bson:"view" json:"view"`
 	Comments int64         `bson:"comments_length,omitempty" json:"comments,omitempty"`
-	PlayList bson.ObjectId `bson:"playlist,omitempty" json:"playlist,omitempty"`
+	PlayList bson.ObjectId `bson:"playlist,omitempty" json:"-"`
+	ListDoc  *outListModel `json:"playlist,omitempty" bson:"listdoc,omitempty"`
 }
 type userVideoModel struct {
 	basicVideoModel `bson:",inline"`
-	ListDoc         *outListModel `json:"listdoc,omitempty" bson:"listdoc,omitempty"`
 }
 type faceVideoModel struct {
 	basicVideoModel `bson:",inline"`
@@ -106,7 +106,6 @@ type detailVideoModel struct {
 	Tag            int8              `bson:"tag" json:"tag" binding:"required"`
 	Recommend      []basicVideoModel `json:"recommend"`
 	ListVideos     []basicVideoModel `json:"plists,omitempty"`
-	ListDoc        *outListModel     `json:"listdoc,omitempty" bson:"listdoc,omitempty"`
 }
 type delVideoModel struct {
 	Path  string `bson:"path" json:"path"`

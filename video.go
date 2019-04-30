@@ -167,8 +167,8 @@ func searchVideo(c *gin.Context) {
 	}
 	var re []faceVideoModel
 	commentslength := bson.M{"$addFields": bson.M{"comments_length": bson.M{"$size": bson.M{"$ifNull": []interface{}{"$comments", []string{}}}}, "likes_length": bson.M{"$size": bson.M{"$ifNull": []interface{}{"$likes", []string{}}}}}}
-	tagmatch := bson.M{"$match": bson.M{"$or": []bson.M{bson.M{"title": bson.M{"$regex": bson.RegEx{Pattern: par.Key, Options: "i"}}}, bson.M{"desc": bson.M{"$regex": bson.RegEx{Pattern: par.Key, Options: "i"}}}}}}
-	err := latestC("video", []bson.M{tagmatch, commentslength}, *par.Start*par.Size, par.Size*(*par.Start+1), &re)
+	tagmatch := bson.M{"$match": bson.M{"$or": []bson.M{bson.M{"title": bson.M{"$regex": bson.RegEx{Pattern: par.Key, Options: "i"}}}, bson.M{"desc": bson.M{"$regex": bson.RegEx{Pattern: par.Key, Options: "i"}}}, bson.M{"listdoc.title": bson.M{"$regex": bson.RegEx{Pattern: par.Key, Options: "i"}}}, bson.M{"listdoc.desc": bson.M{"$regex": bson.RegEx{Pattern: par.Key, Options: "i"}}}}}}
+	err := latestC("video", []bson.M{looklist, unwindlist, tagmatch, commentslength}, *par.Start*par.Size, par.Size*(*par.Start+1), &re)
 	if err != nil {
 		c.JSON(200, false)
 		return
@@ -187,20 +187,20 @@ func latestVideo(c *gin.Context) {
 	re := make([][]faceVideoModel, 1, 12)
 	log.Println(*params.Start*params.Size, *params.Start*(params.Size+1))
 	commentslength := bson.M{"$addFields": bson.M{"comments_length": bson.M{"$size": bson.M{"$ifNull": []interface{}{"$comments", []string{}}}}, "likes_length": bson.M{"$size": bson.M{"$ifNull": []interface{}{"$likes", []string{}}}}}}
-	removeListDump := bson.M{"$group": bson.M{"_id": bson.M{"$ifNull": []string{"$playlist", "$_id"}}, "doc": bson.M{"$last": "$$ROOT"}}}
-	replaceroot := bson.M{"$replaceRoot": bson.M{"newRoot": "$doc"}}
+	removeListDump := bson.M{"$group": bson.M{"_id": bson.M{"$ifNull": []string{"$playlist", "$_id"}}, "counter": bson.M{"$sum": "$view"}, "doc": bson.M{"$last": "$$ROOT"}}}
+	replaceroot := bson.M{"$replaceRoot": bson.M{"newRoot": bson.M{"$mergeObjects": []interface{}{"$doc", bson.M{"view": "$counter"}}}}}
 	var err error
 	if params.Tag == -1 {
 		for i := 0; i < 12; i++ {
 			tagmatch := bson.M{"$match": bson.M{"tag": i + 1}}
-			err = latestC("video", []bson.M{removeListDump, replaceroot, tagmatch, commentslength}, *params.Start*params.Size, params.Size*(*params.Start+1), &re[i])
+			err = latestC("video", []bson.M{tagmatch, removeListDump, replaceroot, looklist, unwindlist, commentslength}, *params.Start*params.Size, params.Size*(*params.Start+1), &re[i])
 			if i != 11 {
 				re = append(re, []faceVideoModel{})
 			}
 		}
 	} else {
 		tagmatch := bson.M{"$match": bson.M{"tag": params.Tag}}
-		err = latestC("video", []bson.M{removeListDump, replaceroot, tagmatch, commentslength}, *params.Start*params.Size, params.Size*(*params.Start+1), &re[0])
+		err = latestC("video", []bson.M{tagmatch, removeListDump, replaceroot, looklist, unwindlist, commentslength}, *params.Start*params.Size, params.Size*(*params.Start+1), &re[0])
 	}
 	if err != nil {
 		c.JSON(200, false)

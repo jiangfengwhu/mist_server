@@ -46,6 +46,11 @@ func getCount(col string, query interface{}) (int, error) {
 	defer s.Close()
 	return s.DB("mist").C(col).Find(query).Count()
 }
+func delC(col string, query interface{}) error {
+	s := initSession.Copy()
+	defer s.Close()
+	return s.DB("mist").C(col).Remove(query)
+}
 func pipiC(col string, pipeline interface{}, result interface{}, all bool) error {
 	s := initSession.Copy()
 	defer s.Close()

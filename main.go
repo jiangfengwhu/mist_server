@@ -60,5 +60,7 @@ func main() {
 	api.PUT("addtolist", Auth(), addtoList)
 	api.PUT("refromlist", Auth(), removeFromList)
 	api.GET("searchVideo", searchVideo)
+	api.DELETE("dellist/:id", Auth(), removeList)
+	api.PUT("updatelist", Auth(), updateList)
 	r.Run(":3030")
 }
