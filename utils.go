@@ -32,19 +32,27 @@ func getMd5(filename string) (string, error) {
 	}
 	return fmt.Sprintf("%x", hs.Sum(nil)), nil
 }
+func getsubs(tpid string) int8 {
+	id := globalConf.ResDir + "/video/" + tpid
+	var counter int8
+	var loop func()
+	loop = func() {
+		cmd := strings.Fields("ffmpeg -i " + id + " -y -map 0:s:" + fmt.Sprint(counter) + " -c:s webvtt " + id + fmt.Sprint(counter) + ".vtt")
+		err := exec.Command(cmd[0], cmd[1:]...).Run()
+		if err != nil {
+			return
+		}
+		counter++
+		loop()
+	}
+	loop()
+	return counter
+}
 func mktorrent(tpid string) (string, error) {
 	id := globalConf.ResDir + "/video/" + tpid
-	// cmd := strings.Fields("ffmpeg -i " + id + " -movflags faststart -acodec copy -vcodec copy -y " + id + ".mp4")
-	// prc := exec.Command(cmd[0], cmd[1:]...)
-	// err := prc.Run()
-	// if err != nil {
-	// 	log.Println(err)
-	// 	return "", err
-	// }
 	// cmd1 := strings.Fields("create-torrent " + id + ".mp4 --pieceLength=734003 --announce=" + globalConf.Announce + " --urlList=" + globalConf.Host + globalConf.ResRef + "/video/" + tpid + ".mp4 -o " + id + ".torrent")
-	// cmd1 := strings.Fields("ffmpeg -i " + id + ".mp4 -c copy -f dash -window_size 0 -seg_duration 5 -init_seg_name " + tpid + "init$RepresentationID$.m4s -media_seg_name " + tpid + "$RepresentationID$-$Number%05d$.m4s -use_template 0 -bsf:a aac_adtstoasc " + id + ".mpd")
-	cmd1 := strings.Fields("ffmpeg -i " + id + " -codec copy -start_number 0 -hls_time 5 -hls_playlist_type vod -hls_allow_cache 1 -f hls " + id + ".m3u8")
-	// cmd1 := strings.Fields("ffmpeg -i " + id + " -c:v h264 -flags +cgop -g 30 -hls_time 5 -hls_playlist_type vod -hls_allow_cache 1 " + id + ".m3u8")
+	cmd1 := strings.Fields("ffmpeg -i " + id + " -codec copy -sn -g 48 -keyint_min 48 -start_number 0 -hls_time 10 -hls_playlist_type vod -hls_allow_cache 1 -f hls " + id + ".m3u8")
+
 	prc1 := exec.Command(cmd1[0], cmd1[1:]...)
 	err := prc1.Run()
 	if err != nil {

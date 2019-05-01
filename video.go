@@ -108,6 +108,7 @@ func addVideo(c *gin.Context) {
 	video.ID = bson.NewObjectId()
 	video.Owner = bson.ObjectIdHex(c.MustGet("auth").(string))
 	video.View = 0
+	tsp := getsubs(video.Hash)
 	tp, err := mktorrent(video.Hash)
 	if err != nil {
 		log.Println(err.Error())
@@ -122,6 +123,7 @@ func addVideo(c *gin.Context) {
 	}
 	video.Path = tp
 	video.Cover = path
+	video.Subtitle = tsp
 	err = insertC("video", video)
 	if err != nil {
 		log.Println(err.Error())

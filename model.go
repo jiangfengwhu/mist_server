@@ -72,6 +72,7 @@ type basicVideoModel struct {
 	ID       bson.ObjectId `bson:"_id" json:"id"`
 	Cover    string        `bson:"cover" json:"cover"`
 	View     int64         `bson:"view" json:"view"`
+	Subtitle int8          `bson:"subtitle,omitempty" json:"subtitle,omitempty"`
 	Comments int64         `bson:"comments_length,omitempty" json:"comments,omitempty"`
 	PlayList bson.ObjectId `bson:"playlist,omitempty" json:"-"`
 	ListDoc  *outListModel `json:"playlist,omitempty" bson:"listdoc,omitempty"`
