@@ -196,7 +196,7 @@ func latestVideo(c *gin.Context) {
 		for i := 0; i < 11; i++ {
 			tagmatch := bson.M{"$match": bson.M{"tag": i + 1}}
 			err = latestC("video", []bson.M{tagmatch, commentslength, removeListDump, replaceroot, looklist, unwindlist}, *params.Start*params.Size, params.Size*(*params.Start+1), &re[i])
-			if i != 11 {
+			if i != 10 {
 				re = append(re, []faceVideoModel{})
 			}
 		}
