@@ -85,6 +85,7 @@ type faceVideoModel struct {
 	Owner           bson.ObjectId  `bson:"owner" json:"-"`
 	OwnerDoc        basicUserModel `bson:"owner_doc,omitempty" json:"owner"`
 	outLikeModel    `bson:",inline"`
+	NVideos         int `bson:"nvideos,omitempty" json:"nvideos,omitempty"`
 }
 type newVideoModel struct {
 	faceVideoModel `bson:",inline"`

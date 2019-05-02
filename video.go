@@ -190,8 +190,8 @@ func latestVideo(c *gin.Context) {
 	re := make([][]faceVideoModel, 1, tagsize)
 	log.Println(*params.Start*params.Size, *params.Start*(params.Size+1))
 	commentslength := bson.M{"$addFields": bson.M{"comments_length": bson.M{"$size": bson.M{"$ifNull": []interface{}{"$comments", []string{}}}}, "likes_length": bson.M{"$size": bson.M{"$ifNull": []interface{}{"$likes", []string{}}}}}}
-	removeListDump := bson.M{"$group": bson.M{"_id": bson.M{"$ifNull": []string{"$playlist", "$_id"}}, "counterview": bson.M{"$sum": "$view"}, "counterlike": bson.M{"$sum": "$likes_length"}, "countercomments": bson.M{"$sum": "$comments_length"}, "doc": bson.M{"$last": "$$ROOT"}}}
-	replaceroot := bson.M{"$replaceRoot": bson.M{"newRoot": bson.M{"$mergeObjects": []interface{}{"$doc", bson.M{"view": "$counterview", "likes_length": "$counterlike", "comments_length": "$countercomments"}}}}}
+	removeListDump := bson.M{"$group": bson.M{"_id": bson.M{"$ifNull": []string{"$playlist", "$_id"}}, "counterview": bson.M{"$sum": "$view"}, "counterlike": bson.M{"$sum": "$likes_length"}, "countercomments": bson.M{"$sum": "$comments_length"}, "counters": bson.M{"$sum": 1}, "doc": bson.M{"$last": "$$ROOT"}}}
+	replaceroot := bson.M{"$replaceRoot": bson.M{"newRoot": bson.M{"$mergeObjects": []interface{}{"$doc", bson.M{"view": "$counterview", "likes_length": "$counterlike", "comments_length": "$countercomments", "nvideos": "$counters"}}}}}
 	var err error
 	if params.Tag == -1 {
 		for i := 0; i < tagsize; i++ {
