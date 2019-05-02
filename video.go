@@ -238,8 +238,8 @@ func getVideo(c *gin.Context) {
 				return
 			}
 			var plist []basicVideoModel
-			listLine := bson.M{"playlist": re.PlayList}
-			err := findC("video", listLine, true, &plist)
+			listLine := bson.M{"$match": bson.M{"playlist": re.PlayList}}
+			err := pipiC("video", []bson.M{listLine, bson.M{"$sort": bson.M{"_id": 1}}}, &plist, true)
 			if err != nil {
 				log.Println(err.Error())
 				c.JSON(200, false)
