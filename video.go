@@ -186,17 +186,18 @@ func latestVideo(c *gin.Context) {
 		return
 	}
 	// empty := []string{}
-	re := make([][]faceVideoModel, 1, 11)
+	tagsize := 11
+	re := make([][]faceVideoModel, 1, tagsize)
 	log.Println(*params.Start*params.Size, *params.Start*(params.Size+1))
 	commentslength := bson.M{"$addFields": bson.M{"comments_length": bson.M{"$size": bson.M{"$ifNull": []interface{}{"$comments", []string{}}}}, "likes_length": bson.M{"$size": bson.M{"$ifNull": []interface{}{"$likes", []string{}}}}}}
 	removeListDump := bson.M{"$group": bson.M{"_id": bson.M{"$ifNull": []string{"$playlist", "$_id"}}, "counterview": bson.M{"$sum": "$view"}, "counterlike": bson.M{"$sum": "$likes_length"}, "countercomments": bson.M{"$sum": "$comments_length"}, "doc": bson.M{"$last": "$$ROOT"}}}
 	replaceroot := bson.M{"$replaceRoot": bson.M{"newRoot": bson.M{"$mergeObjects": []interface{}{"$doc", bson.M{"view": "$counterview", "likes_length": "$counterlike", "comments_length": "$countercomments"}}}}}
 	var err error
 	if params.Tag == -1 {
-		for i := 0; i < 11; i++ {
+		for i := 0; i < tagsize; i++ {
 			tagmatch := bson.M{"$match": bson.M{"tag": i + 1}}
 			err = latestC("video", []bson.M{tagmatch, commentslength, removeListDump, replaceroot, looklist, unwindlist}, *params.Start*params.Size, params.Size*(*params.Start+1), &re[i])
-			if i != 10 {
+			if i != tagsize-1 {
 				re = append(re, []faceVideoModel{})
 			}
 		}
