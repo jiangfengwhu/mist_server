@@ -32,21 +32,39 @@ func getMd5(filename string) (string, error) {
 	}
 	return fmt.Sprintf("%x", hs.Sum(nil)), nil
 }
-func getsubs(tpid string) int8 {
+func getsubs(tpid string) []string {
 	id := globalConf.ResDir + "/video/" + tpid
-	var counter int8
+	re := make([]string, 0, 5)
+	var counter uint8
 	var loop func()
 	loop = func() {
-		cmd := strings.Fields("ffmpeg -i " + id + " -y -map 0:s:" + fmt.Sprint(counter) + " -c:s webvtt " + id + fmt.Sprint(counter) + ".vtt")
+		cmd := strings.Fields("ffmpeg -i " + id + " -y -map 0:s:" + fmt.Sprint(counter) + " -c:s webvtt " + id + ".vtt")
 		err := exec.Command(cmd[0], cmd[1:]...).Run()
 		if err != nil {
 			return
 		}
+		hash, _ := getMd5(id + ".vtt")
+		os.Rename(id+".vtt", globalConf.ResDir+"/video/"+hash+".vtt")
+		re = append(re, globalConf.ResDir+"/video/"+hash+".vtt")
 		counter++
 		loop()
 	}
 	loop()
-	return counter
+	return re
+}
+func saveSubs(loc string) string {
+	cmd := strings.Fields("ffmpeg -i " + loc + " " + loc + ".vtt")
+	err := exec.Command(cmd[0], cmd[1:]...).Run()
+	if err != nil {
+		log.Println(err.Error())
+		return ""
+	}
+	hash, _ := getMd5(loc + ".vtt")
+	if err := os.Rename(loc+".vtt", globalConf.ResDir+"/video/"+hash+".vtt"); err != nil {
+		return ""
+	}
+	os.Remove(loc)
+	return globalConf.ResDir + "/video/" + hash + ".vtt"
 }
 func mktorrent(tpid string) (string, error) {
 	id := globalConf.ResDir + "/video/" + tpid

@@ -72,7 +72,7 @@ type basicVideoModel struct {
 	ID       bson.ObjectId `bson:"_id" json:"id"`
 	Cover    string        `bson:"cover" json:"cover"`
 	View     int64         `bson:"view" json:"view"`
-	Subtitle int8          `bson:"subtitle,omitempty" json:"subtitle,omitempty"`
+	Subtitle []string      `bson:"subtitle,omitempty" json:"subtitle,omitempty"`
 	Comments int64         `bson:"comments_length,omitempty" json:"comments,omitempty"`
 	PlayList bson.ObjectId `bson:"playlist,omitempty" json:"-"`
 	ListDoc  *outListModel `json:"playlist,omitempty" bson:"listdoc,omitempty"`
@@ -110,8 +110,9 @@ type detailVideoModel struct {
 	ListVideos     []basicVideoModel `json:"plists,omitempty"`
 }
 type delVideoModel struct {
-	Path  string `bson:"path" json:"path"`
-	Cover string `bson:"cover" json:"cover"`
+	Path  string   `bson:"path" json:"path"`
+	Cover string   `bson:"cover" json:"cover"`
+	Subs  []string `bson:"subtitle" jsob:"subtitle"`
 }
 type uploadFileModel struct {
 	Blob *multipart.FileHeader `json:"blob" form:"blob" binding:"required"`
@@ -213,4 +214,3 @@ type searchModel struct {
 	Size  int    `form:"size" binding:"required"`
 	Start *int   `form:"fi" binding:"exists"`
 }
-

@@ -326,6 +326,9 @@ func delvideoc(c *gin.Context) {
 			for _, v := range vs {
 				os.Remove(v)
 			}
+			for _, v := range vc.Subs {
+				os.Remove(globalConf.ResDir + "/video/" + filepath.Base(v))
+			}
 		}
 		c.JSON(200, gin.H{"msg": "删除专辑成功", "status": true})
 		return
@@ -376,6 +379,50 @@ func checkOWN(c *gin.Context) {
 		return
 	}
 	c.JSON(200, true)
+	return
+}
+
+type delSubModel struct {
+	ID  bson.ObjectId `bson:"_id" json:"id" binding:"required"`
+	Sub string        `json:"sub" binding:"required"`
+}
+
+func delSub(c *gin.Context) {
+	var del delSubModel
+	if err := c.ShouldBind(&del); err != nil {
+		log.Println(err.Error())
+		return
+	}
+	err := updateC("video", bson.M{"_id": del.ID, "owner": bson.ObjectIdHex(c.MustGet("auth").(string))}, bson.M{"$pull": bson.M{"subtitle": del.Sub}})
+	if err != nil {
+		c.JSON(200, gin.H{"status": false, "msg": err.Error()})
+		return
+	}
+	if err := os.Remove(globalConf.ResDir + "/video/" + filepath.Base(del.Sub)); err != nil {
+		log.Println(err.Error())
+		c.JSON(200, gin.H{"msg": "删除文件错误", "status": false})
+		return
+	}
+	c.JSON(200, gin.H{"status": true, "msg": "删除字幕成功"})
+	return
+}
+func addSub(c *gin.Context) {
+	var sub uploadFileModel
+	if err := c.ShouldBind(&sub); err != nil {
+		log.Println(err.Error())
+		return
+	}
+	if err := c.SaveUploadedFile(sub.Blob, globalConf.ResDir+"/video/"+sub.Blob.Filename); err != nil {
+		c.JSON(200, gin.H{"status": false, "msg": err.Error()})
+		return
+	}
+	sp := saveSubs(globalConf.ResDir + "/video/" + sub.Blob.Filename)
+	err := updateC("video", bson.M{"_id": bson.ObjectIdHex(sub.ID), "owner": bson.ObjectIdHex(c.MustGet("auth").(string))}, bson.M{"$addToSet": bson.M{"subtitle": sp}})
+	if err != nil {
+		c.JSON(200, gin.H{"status": false, "msg": err.Error()})
+		return
+	}
+	c.JSON(200, gin.H{"status": true, "sub": sp, "msg": "添加字幕成功"})
 	return
 }
 func delvideo(c *gin.Context) {
