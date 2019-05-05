@@ -45,7 +45,7 @@ func getsubs(tpid string) []string {
 		}
 		hash, _ := getMd5(id + ".vtt")
 		os.Rename(id+".vtt", globalConf.ResDir+"/video/"+hash+".vtt")
-		re = append(re, globalConf.ResDir+"/video/"+hash+".vtt")
+		re = append(re, globalConf.ResRef+"/video/"+hash+".vtt")
 		counter++
 		loop()
 	}
@@ -64,7 +64,7 @@ func saveSubs(loc string) string {
 		return ""
 	}
 	os.Remove(loc)
-	return globalConf.ResDir + "/video/" + hash + ".vtt"
+	return globalConf.ResRef + "/video/" + hash + ".vtt"
 }
 func mktorrent(tpid string) (string, error) {
 	id := globalConf.ResDir + "/video/" + tpid
