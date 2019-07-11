@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"os"
+	"flag"
 )
 
 var globalConf configModel
@@ -18,9 +19,11 @@ type configModel struct {
 }
 
 func getConfig() {
-	configFile, err := os.Open("./.config.json")
+	confpath := flag.String("config", "./.config.json", "config file path")
+	flag.Parse()
+	configFile, err := os.Open(*confpath)
 	if err != nil {
-		log.Println(err)
+		log.Fatal(err)
 		return
 	}
 	json.NewDecoder(configFile).Decode(&globalConf)
